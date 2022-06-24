@@ -21,22 +21,22 @@ main (void)
 {
     WDT_A->CTL = WDT_A_CTL_PW | WDT_A_CTL_HOLD;     /* Stop watchdog timer. */
 
-    P1->DIR &= ~(S1 | S2);
-    P1->REN = S1 | S2;
-    P1->OUT = S1 | S2;
-    P2->DIR = LED2_RED | LED2_BLUE;
-    P2->OUT = 0x00;
+    P1->DIR &= ~(S1 | S2); /* Set P1.1 and P1.4 as inputs */
+    P1->REN = S1 | S2; /* Enable pull-up/down resistor for P1.1 and P1.4 */
+    P1->OUT = S1 | S2; /* Set pull-up/down resistor as pull-up */
+    P2->DIR = LED2_RED | LED2_BLUE; /* Set P2.0 and P2.2 as outputs */
+    P2->OUT = 0x00;  /* Turn off LED2 */
 
     while (1) {
         if ((P1->IN & S1) == 0) /* Active-low input indicates the switch is pressed. */
-            P2->OUT ^= LED2_BLUE;    /* Turn on LED 1. */
+            P2->OUT ^= LED2_BLUE;    /* Turn on LED1_BLUE. */
         else
-            P2->OUT &= ~LED2_BLUE;   /* Turn off LED 1. */
+            P2->OUT &= ~LED2_BLUE;   /* Turn off LED2_BLUE. */
 
         if ((P1->IN & S2) == 0) /* Active-low input indicates the switch is pressed. */
-            P2->OUT ^= LED2_RED;    /* Turn on LED 1. */
+            P2->OUT ^= LED2_RED;    /* Turn on LED2_RED. */
         else
-            P2->OUT &= ~LED2_RED;   /* Turn off LED 1. */
+            P2->OUT &= ~LED2_RED;   /* Turn off LED2_RED. */
     }
 }
 
