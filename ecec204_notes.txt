@@ -1,0 +1,29 @@
+ECEC204 Notes Document
+Cole Bardin
+June 27th, 2022
+
+
+Each Port Px where x is an integer, is a struct containing 5 uint8_t:
+
+struct *Px {
+	uint8_t DIR; /* Direction */
+	uint8_t OUT; /*
+	uint8_t IN;
+	uint8_t REN;
+	uint8_t SEL;
+};
+
+PINS: Px.y where x.y is a float. x being the port and y being the index
+Two build in LEDS:
+LED1 -> red (P1.0)
+LED2 -> r|g|b (P2.0 red, P2.1 green, P2.2 blue)
+
+Switches:
+S1 P1.1
+S2 P1.4
+
+
+Enabling Ports/Pins
+P6->DIR |= 0b10000000; /* Enables P6.7 without affecting other pins */
+P6->DIR ^= 0b10000000; /* Toggles P6.7 without affecting other pins */
+P6->DIR &= 0b10000000; /* 
