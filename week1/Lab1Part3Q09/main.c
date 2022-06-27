@@ -29,14 +29,14 @@ main (void)
 
     while (1) {
         if ((P1->IN & S1) == 0) /* Active-low input indicates the switch is pressed. */
-            P2->OUT ^= LED2_BLUE;    /* Turn on LED1_BLUE. */
+            P2->OUT ^= LED2_RED;    /* Turn on LED1_BLUE. */
         else
-            P2->OUT &= ~LED2_BLUE;   /* Turn off LED2_BLUE. */
+            P2->OUT &= ~LED2_RED;   /* Turn off LED2_BLUE. */
 
         if ((P1->IN & S2) == 0) /* Active-low input indicates the switch is pressed. */
-            P2->OUT ^= LED2_RED;    /* Turn on LED2_RED. */
+            P2->OUT ^= LED2_BLUE;    /* Turn on LED2_RED. */
         else
-            P2->OUT &= ~LED2_RED;   /* Turn off LED2_RED. */
+            P2->OUT &= ~LED2_BLUE;   /* Turn off LED2_RED. */
     }
 }
 
