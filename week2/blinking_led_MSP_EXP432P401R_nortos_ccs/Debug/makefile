@@ -2,9 +2,7 @@
 # Automatically-generated file. Do not edit!
 ################################################################################
 
-SHELL = cmd.exe
-
-CG_TOOL_ROOT := C:/ti/ccs901/ccs/tools/compiler/ti-cgt-arm_18.12.1.LTS
+CG_TOOL_ROOT := /Applications/ti/ccs1120/ccs/tools/compiler/ti-cgt-arm_20.2.5.LTS
 
 GEN_OPTS__FLAG := 
 GEN_CMDS__FLAG := 
@@ -25,8 +23,8 @@ $(GEN_CMDS__FLAG) \
 
 -include ../makefile.init
 
-RM := DEL /F
-RMDIR := RMDIR /S/Q
+RM := rm -rf
+RMDIR := rm -rf
 
 # All of the sources participating in the build are defined here
 -include sources.mk
@@ -130,42 +128,42 @@ endif
 
 # Add inputs and outputs from these tool invocations to the build variables 
 EXE_OUTPUTS += \
-blinking_LED_on_MSP_EXP432P401R_nortos_ccs.out \
+blinking_led_MSP_EXP432P401R_nortos_ccs.out \
 
 EXE_OUTPUTS__QUOTED += \
-"blinking_LED_on_MSP_EXP432P401R_nortos_ccs.out" \
+"blinking_led_MSP_EXP432P401R_nortos_ccs.out" \
 
 BIN_OUTPUTS += \
-blinking_LED_on_MSP_EXP432P401R_nortos_ccs.hex \
+blinking_led_MSP_EXP432P401R_nortos_ccs.hex \
 
 BIN_OUTPUTS__QUOTED += \
-"blinking_LED_on_MSP_EXP432P401R_nortos_ccs.hex" \
+"blinking_led_MSP_EXP432P401R_nortos_ccs.hex" \
 
 
 # All Target
 all: $(OBJS) $(CMD_SRCS) $(GEN_CMDS)
-	@$(MAKE) --no-print-directory -Onone "blinking_LED_on_MSP_EXP432P401R_nortos_ccs.out"
+	@$(MAKE) --no-print-directory -Onone "blinking_led_MSP_EXP432P401R_nortos_ccs.out"
 
 # Tool invocations
-blinking_LED_on_MSP_EXP432P401R_nortos_ccs.out: $(OBJS) $(CMD_SRCS) $(GEN_CMDS)
+blinking_led_MSP_EXP432P401R_nortos_ccs.out: $(OBJS) $(CMD_SRCS) $(GEN_CMDS)
 	@echo 'Building target: "$@"'
 	@echo 'Invoking: ARM Linker'
-	"C:/ti/ccs901/ccs/tools/compiler/ti-cgt-arm_18.12.1.LTS/bin/armcl" -mv7M4 --code_state=16 --float_support=FPv4SPD16 -me --advice:power=none --define=__MSP432P401R__ --define=DeviceFamily_MSP432P401x -g --diag_warning=225 --diag_warning=255 --diag_wrap=off --display_error_number --gen_func_subsections=on -z -m"blinking_LED_on_MSP_EXP432P401R_nortos_ccs.map" --stack_size=512 -i"C:/ti/simplelink_msp432p4_sdk_3_10_00_08/source" -i"C:/ti/ccs901/ccs/tools/compiler/ti-cgt-arm_18.12.1.LTS/lib" --diag_wrap=off --display_error_number --warn_sections --xml_link_info="blinking_LED_on_MSP_EXP432P401R_nortos_ccs_linkInfo.xml" --rom_model -o "blinking_LED_on_MSP_EXP432P401R_nortos_ccs.out" $(ORDERED_OBJS)
+	"/Applications/ti/ccs1120/ccs/tools/compiler/ti-cgt-arm_20.2.5.LTS/bin/armcl" -mv7M4 --code_state=16 --float_support=FPv4SPD16 -me --advice:power=none --define=__MSP432P401R__ --define=DeviceFamily_MSP432P401x -g --diag_warning=225 --diag_warning=255 --diag_wrap=off --display_error_number --gen_func_subsections=on -z -m"blinking_led_MSP_EXP432P401R_nortos_ccs.map" --stack_size=512 -i"/Applications/ti/simplelink_msp432p4_sdk_3_40_01_02/source" -i"/Applications/ti/ccs1120/ccs/tools/compiler/ti-cgt-arm_20.2.5.LTS/lib" --diag_wrap=off --display_error_number --warn_sections --xml_link_info="blinking_led_MSP_EXP432P401R_nortos_ccs_linkInfo.xml" --rom_model -o "blinking_led_MSP_EXP432P401R_nortos_ccs.out" $(ORDERED_OBJS)
 	@echo 'Finished building target: "$@"'
 	@echo ' '
 
-blinking_LED_on_MSP_EXP432P401R_nortos_ccs.hex: $(EXE_OUTPUTS)
-	@echo 'Building files: $(strip $(EXE_OUTPUTS__QUOTED))'
+blinking_led_MSP_EXP432P401R_nortos_ccs.hex: $(EXE_OUTPUTS)
+	@echo 'Building secondary target: "$@"'
 	@echo 'Invoking: ARM Hex Utility'
-	"C:/ti/ccs901/ccs/tools/compiler/ti-cgt-arm_18.12.1.LTS/bin/armhex"  -o "blinking_LED_on_MSP_EXP432P401R_nortos_ccs.hex" $(EXE_OUTPUTS__QUOTED)
-	@echo 'Finished building: $(strip $(EXE_OUTPUTS__QUOTED))'
+	"/Applications/ti/ccs1120/ccs/tools/compiler/ti-cgt-arm_20.2.5.LTS/bin/armhex" --diag_wrap=off -o "blinking_led_MSP_EXP432P401R_nortos_ccs.hex" $(EXE_OUTPUTS__QUOTED)
+	@echo 'Finished building secondary target: "$@"'
 	@echo ' '
 
 # Other Targets
 clean:
 	-$(RM) $(BIN_OUTPUTS__QUOTED)$(EXE_OUTPUTS__QUOTED)
-	-$(RM) "main.obj" "system_msp432p401r.obj" "ccs\startup_msp432p401r_ccs.obj" 
-	-$(RM) "main.d" "system_msp432p401r.d" "ccs\startup_msp432p401r_ccs.d" 
+	-$(RM) "main.obj" "system_msp432p401r.obj" "ccs/startup_msp432p401r_ccs.obj" 
+	-$(RM) "main.d" "system_msp432p401r.d" "ccs/startup_msp432p401r_ccs.d" 
 	-@echo 'Finished clean'
 	-@echo ' '
 
