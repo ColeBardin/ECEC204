@@ -6,11 +6,11 @@ June 27th, 2022
 Each Port Px where x is an integer, is a struct containing 5 uint8_t:
 
 struct *Px {
-	uint8_t DIR; /* Direction */
-	uint8_t OUT; /*
-	uint8_t IN;
-	uint8_t REN;
-	uint8_t SEL;
+	uint8_t DIR; /* Direction index of bits-> 1 for outputs for Px.index */
+	uint8_t OUT; /* If dir is OUT, then it produces output */
+	uint8_t IN;  /* If dir is IN, then there is an input number */
+	uint8_t REN; /* Pull up/down, 1 for index makes Px.index active high, 0 for low */
+	uint8_t SEL; /* */
 };
 
 PINS: Px.y where x.y is a float. x being the port and y being the index
@@ -23,11 +23,12 @@ S1 P1.1
 S2 P1.4
 
 
-Enabling Ports/Pins
+Enabling Ports/Pins with Operands:
 P6->DIR |= 0b10000000; /* Enables P6.7 without affecting other pins */
 P6->DIR ^= 0b10000000; /* Toggles P6.7 without affecting other pins */
 P6->DIR &= 0b10000000; /* Keeps P6.7 status while setting all other pins to off */
 
+&= with 1 OR |= with 0 keeps status of other pins
 
 
 Serial Communication:

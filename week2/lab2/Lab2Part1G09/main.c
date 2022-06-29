@@ -39,7 +39,7 @@ void EUSCIA0_IRQHandler(void)
 void delaysecs(uint8_t secs)
 {
     uint32_t i;
-    for (i=0;i<NUMBER*secs;i++); // Get NUMBER by calibrating for 1 second
+    /* TODO: for (i=0;i<NUMBER*secs;i++); Get NUMBER by calibrating for 1 second */
     return;
 }
 int main(void)
@@ -68,7 +68,9 @@ int main(void)
          * Check newinterval input is within the valid range 1-5 secs. If so, replace
          * oldinterval by newinterval. Else leave oldinterval unchanged */
 
-        delaysecs(FILL UP ARGUMENT);
+        /* TODO:
+         *
+         * delaysecs(FILL UP ARGUMENT); */
         
         /* TODO:
          * Toggle RED LED2 */
