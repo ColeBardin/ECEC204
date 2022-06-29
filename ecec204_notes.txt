@@ -30,3 +30,7 @@ P6->DIR &= 0b10000000; /* Keeps P6.7 status while setting all other pins to off 
 
 
 
+Serial Communication:
+UART: Universal Asynchronous Rx Tx
+
+
