@@ -26,4 +26,7 @@ S2 P1.4
 Enabling Ports/Pins
 P6->DIR |= 0b10000000; /* Enables P6.7 without affecting other pins */
 P6->DIR ^= 0b10000000; /* Toggles P6.7 without affecting other pins */
-P6->DIR &= 0b10000000; /* 
+P6->DIR &= 0b10000000; /* Keeps P6.7 status while setting all other pins to off */
+
+
+
