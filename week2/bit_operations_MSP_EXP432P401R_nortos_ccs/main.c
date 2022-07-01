@@ -14,8 +14,7 @@
 #include "bit_operations.h"
 #include "uart_functions.h"
 
-int
-main (void)
+int main (void)
 {
     /* Stop Watchdog  */
     MAP_WDT_A_holdTimer();
