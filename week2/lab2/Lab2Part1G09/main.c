@@ -6,6 +6,11 @@
 /* Standard Includes */
 #include <stdint.h>
 #include <stdbool.h>
+
+#define NUMBER (1000000)
+#define RED_LED2 BIT0
+
+
 uint8_t oldinterval=0x31; // default value for 1 sec
 uint16_t newinterval;
 const eUSCI_UART_ConfigV1 uartConfig=   // For CCSv9 and CCSv10 have UART_ConfigV1
@@ -39,17 +44,18 @@ void EUSCIA0_IRQHandler(void)
 void delaysecs(uint8_t secs)
 {
     uint32_t i;
-    /* TODO: for (i=0;i<NUMBER*secs;i++); Get NUMBER by calibrating for 1 second */
+    for (i=0;i<NUMBER*secs;i++);
     return;
 }
 int main(void)
 {
     /* Stop Watchdog  */
     MAP_WDT_A_holdTimer();
-    /* TODO:
-     * set RED LED2 as output
-     * Make drive strength high for REDLED2
-     * Switch OFF RED LED2  */
+    GPIO_setAsOutputPin (GPIO_PORT_P2, GPIO_PIN0);
+    P2->DIR = RED_LED2; /* Enable bit0 of Port 2 as an output */
+    P2->REN = RED_LED2; /* Set P2.0 as pull up */
+    P2->OUT = 0x00; /* Turn off Red LED */
+
 
     // P1.2 and P1.3 are UART TXD and RXD. These pins must be put in special function mode
         GPIO_setAsPeripheralModuleFunctionInputPin(GPIO_PORT_P1,GPIO_PIN2|GPIO_PIN3,GPIO_PRIMARY_MODULE_FUNCTION);
@@ -67,13 +73,10 @@ int main(void)
         /* TODO:
          * Check newinterval input is within the valid range 1-5 secs. If so, replace
          * oldinterval by newinterval. Else leave oldinterval unchanged */
-
-        /* TODO:
-         *
-         * delaysecs(FILL UP ARGUMENT); */
-        
-        /* TODO:
-         * Toggle RED LED2 */
-
+        if ( (newinterval > 0x30) & (newinterval < 0x36)) {
+            oldinterval = newinterval;
+        }
+        delaysecs(oldinterval - 0x30);
+        GPIO_toggleOutputOnPin (GPIO_PORT_P2, GPIO_PIN0);
     }
 }
