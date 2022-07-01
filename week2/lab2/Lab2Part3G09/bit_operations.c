@@ -5,8 +5,7 @@
 #include <stdint.h>
 #include "bit_operations.h"
 
-uint8_t
-countBits (uint8_t v)
+uint8_t countBits (uint8_t v)
 {
     uint8_t count = 0;
 
@@ -15,8 +14,7 @@ countBits (uint8_t v)
     return count;
 }
 
-int
-isPowerOfTwo (uint8_t v)
+int isPowerOfTwo (uint8_t v)
 {
     int status = 0;
 
@@ -25,8 +23,7 @@ isPowerOfTwo (uint8_t v)
     return status;
 }
 
-uint8_t
-rearrangeBits (uint8_t v)
+uint8_t rearrangeBits (uint8_t v)
 {
     uint8_t rv = 0;
 
