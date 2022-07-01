@@ -70,13 +70,11 @@ int main(void)
 
     while(1)
     {
-        /* TODO:
-         * Check newinterval input is within the valid range 1-5 secs. If so, replace
-         * oldinterval by newinterval. Else leave oldinterval unchanged */
+        /* Make sure interval is between 1 and 5 */
         if ( (newinterval > 0x30) & (newinterval < 0x36)) {
-            oldinterval = newinterval;
+            oldinterval = newinterval; /* If so save it as old interval */
         }
-        delaysecs(oldinterval - 0x30);
-        GPIO_toggleOutputOnPin (GPIO_PORT_P2, GPIO_PIN0);
+        delaysecs(oldinterval - 0x30); /* Delay for oldinterval seconds */
+        GPIO_toggleOutputOnPin (GPIO_PORT_P2, GPIO_PIN0); /* Toggle P2.0 */
     }
 }
