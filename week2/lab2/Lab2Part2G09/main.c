@@ -91,7 +91,7 @@ int main(void)
             putString(message);
             newinterval = 0x00;
         }
-        if (!(P6->IN & B1) == 0) { /* If P6.0 is grounded (button pressed) */
+        if (!(P6->IN & B1) == 0) { /* If P6.0 is not grounded (button not pressed) */
             GPIO_toggleOutputOnPin (GPIO_PORT_P6, GPIO_PIN4); /* Toggle P6.4 */
             delaysecs(oldinterval - 0x30); /* Delay for oldinterval seconds */
         }
