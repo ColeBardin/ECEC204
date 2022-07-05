@@ -66,20 +66,20 @@ int main(void)
 {
     /* Stop Watchdog  */
     MAP_WDT_A_holdTimer();
-    P6->DIR = LED; /* Set P6.0 as output. */
-    P6->REN = B1;   /* Enable the pull-up/down register for P6.1. */
+    P6->DIR = LED; /* Set P6.4 as output. */
+    P6->REN = B1;   /* Enable the pull-up/down register for P6.0. */
     P6->OUT = B1;   /* The pull-up/down register is set as pull-up. */
 
 
     // P1.2 and P1.3 are UART TXD and RXD. These pins must be put in special function mode
-        GPIO_setAsPeripheralModuleFunctionInputPin(GPIO_PORT_P1,GPIO_PIN2|GPIO_PIN3,GPIO_PRIMARY_MODULE_FUNCTION);
-        //Sets DCO frequency at 12 MHz to get correct baud rate of 9600
-        CS_setDCOCenteredFrequency(CS_DCO_FREQUENCY_12);
-        MAP_UART_initModule(EUSCI_A0_BASE, &uartConfig);
-        MAP_UART_enableModule(EUSCI_A0_BASE);
-        UART_enableInterrupt(EUSCI_A0_BASE,EUSCI_A_UART_RECEIVE_INTERRUPT);
-        Interrupt_enableInterrupt(INT_EUSCIA0);
-        Interrupt_enableMaster();
+    GPIO_setAsPeripheralModuleFunctionInputPin(GPIO_PORT_P1,GPIO_PIN2|GPIO_PIN3,GPIO_PRIMARY_MODULE_FUNCTION);
+    //Sets DCO frequency at 12 MHz to get correct baud rate of 9600
+    CS_setDCOCenteredFrequency(CS_DCO_FREQUENCY_12);
+    MAP_UART_initModule(EUSCI_A0_BASE, &uartConfig);
+    MAP_UART_enableModule(EUSCI_A0_BASE);
+    UART_enableInterrupt(EUSCI_A0_BASE,EUSCI_A_UART_RECEIVE_INTERRUPT);
+    Interrupt_enableInterrupt(INT_EUSCIA0);
+    Interrupt_enableMaster();
 
 
     while(1)
@@ -91,9 +91,9 @@ int main(void)
             putString(message);
             newinterval = 0x00;
         }
-        delaysecs(oldinterval - 0x30); /* Delay for oldinterval seconds */
-        if (!(P6->IN & B1) == 0) {
+        if (!(P6->IN & B1) == 0) { /* If P6.0 is grounded (button pressed) */
             GPIO_toggleOutputOnPin (GPIO_PORT_P6, GPIO_PIN4); /* Toggle P6.4 */
+            delaysecs(oldinterval - 0x30); /* Delay for oldinterval seconds */
         }
     }
 }
