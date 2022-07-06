@@ -7,7 +7,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 
-#define NUMBER (1000000)
+#define NUMBER (750750)
 #define RED_LED2 BIT0
 
 
@@ -51,7 +51,6 @@ int main(void)
 {
     /* Stop Watchdog  */
     MAP_WDT_A_holdTimer();
-    GPIO_setAsOutputPin (GPIO_PORT_P2, GPIO_PIN0);
     P2->DIR = RED_LED2; /* Enable bit0 of Port 2 as an output */
     P2->REN = RED_LED2; /* Set P2.0 as pull up */
     P2->OUT = 0x00; /* Turn off Red LED */
