@@ -1,7 +1,13 @@
+# Mac stuff
 .DS_Store
+
+# CCS Stuff
 .metadata
+*/.metadata
 .jxbrowser.userdata
+/.jxbrowser.userdata
 RemoteSystemsTempFiles
+*/RemoteSystemsTempFiles
 */.launches
 */.settings
 */.debug
