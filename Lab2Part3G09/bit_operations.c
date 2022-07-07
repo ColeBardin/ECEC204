@@ -27,7 +27,15 @@ uint8_t countBits (uint8_t v)
 
 int isPowerOfTwo (uint8_t v)
 {
-    int status = 0;
+    int status = 1;
+    uint8_t index;
+    for (index=0; index<8; index++) {
+        if ( ((v % 2) & (v != 1)) | (v==0) ) {
+            status = 0;
+            break;
+        }
+        v = v/2;
+    }
 
     /* FIXME: Write your code here. */
 
@@ -37,8 +45,7 @@ int isPowerOfTwo (uint8_t v)
 uint8_t rearrangeBits (uint8_t v)
 {
     uint8_t rv = 0;
-
-    /* FIXME: Write your code here. */
+    rv = (-1 << 8-countBits(v) ); /* bitshift 11111111 (-1) to the left for each 0 in v ( 8 - countBits(v) ) */
 
     return rv;
 }

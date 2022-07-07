@@ -10,6 +10,7 @@ RemoteSystemsTempFiles
 */RemoteSystemsTempFiles
 dtv
 */dvt
-*/.launches
+*/.launches/
 */.settings
 */.debug
+*.launch
