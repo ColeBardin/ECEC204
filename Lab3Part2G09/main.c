@@ -1,4 +1,9 @@
-/* Lab 3 Part 2 G 09 */
+/* Description: Code for finite state machine (FSM) whose behavior is
+ * dictated by BUTTON1 and BUTTON2.
+ *
+ * Author: Naga Kandasamy
+ * Date created: July 5, 2019
+*******************************************************************************/
 
 /* DriverLib Includes */
 #include <ti/devices/msp432p4xx/driverlib/driverlib.h>
@@ -60,20 +65,20 @@ int main(void) {
     Interrupt_enableInterrupt(INT_EUSCIA0);
     Interrupt_enableMaster();
 
-    GPIO_setAsOutputPin(GPIO_PORT_P2, GPIO_PIN0); /* Register P2.0 as output (red) 6.4 */
-    GPIO_setAsOutputPin(GPIO_PORT_P2, GPIO_PIN1); /* Register P2.0 as output (green) 6.5 */
-    GPIO_setAsOutputPin(GPIO_PORT_P2, GPIO_PIN2); /* Register P2.0 as output (blue) 6.6 */
-    GPIO_setAsInputPinWithPullUpResistor (GPIO_PORT_P1, GPIO_PIN1); /* Register P1.1 as input (Switch 1) 6.0 */
-    GPIO_setAsInputPinWithPullUpResistor (GPIO_PORT_P1, GPIO_PIN4); /* Register P1.4 as input (Switch 2) 6.1 */
+    GPIO_setAsOutputPin(GPIO_PORT_P6, GPIO_PIN4); /* Register P2.0 as output (red) 6.4 */
+    GPIO_setAsOutputPin(GPIO_PORT_P6, GPIO_PIN5); /* Register P2.0 as output (green) 6.5 */
+    GPIO_setAsOutputPin(GPIO_PORT_P6, GPIO_PIN6); /* Register P2.0 as output (blue) 6.6 */
+    GPIO_setAsInputPinWithPullUpResistor (GPIO_PORT_P6, GPIO_PIN0); /* Register P1.1 as input (Switch 1) 6.0 */
+    GPIO_setAsInputPinWithPullUpResistor (GPIO_PORT_P6, GPIO_PIN1); /* Register P1.4 as input (Switch 2) 6.1 */
 
-    GPIO_setOutputLowOnPin(GPIO_PORT_P2,GPIO_PIN0);
-    GPIO_setOutputLowOnPin(GPIO_PORT_P2,GPIO_PIN1);
-    GPIO_setOutputLowOnPin(GPIO_PORT_P2,GPIO_PIN2);
+    GPIO_setOutputLowOnPin(GPIO_PORT_P6,GPIO_PIN4);
+    GPIO_setOutputLowOnPin(GPIO_PORT_P6,GPIO_PIN5);
+    GPIO_setOutputLowOnPin(GPIO_PORT_P6,GPIO_PIN6);
 
     while(1)
     {
-        s1 = GPIO_getInputPinValue(GPIO_PORT_P1, GPIO_PIN1);
-        s2 = GPIO_getInputPinValue(GPIO_PORT_P1, GPIO_PIN4);
+        s1 = GPIO_getInputPinValue(GPIO_PORT_P6, GPIO_PIN0);
+        s2 = GPIO_getInputPinValue(GPIO_PORT_P6, GPIO_PIN1);
         if ( (s1==GPIO_INPUT_PIN_LOW) & (s2==GPIO_INPUT_PIN_LOW) ){
             putString("State: 3");
             state = 3;
@@ -92,22 +97,26 @@ int main(void) {
         }
         switch (state) {
             case 0:
+                GPIO_setOutputLowOnPin(GPIO_PORT_P6,GPIO_PIN4);
+                GPIO_setOutputLowOnPin(GPIO_PORT_P6,GPIO_PIN5);
+                GPIO_setOutputLowOnPin(GPIO_PORT_P6,GPIO_PIN6);
                 delaysecs(DELAY);
                 break;
             case 1:
-                GPIO_setOutputHighOnPin(GPIO_PORT_P2,GPIO_PIN0);
+                GPIO_setOutputHighOnPin(GPIO_PORT_P6,GPIO_PIN4);
+                GPIO_setOutputLowOnPin(GPIO_PORT_P6,GPIO_PIN5);
                 delaysecs(DELAY);
-                GPIO_setOutputLowOnPin(GPIO_PORT_P2,GPIO_PIN0);
+                GPIO_setOutputLowOnPin(GPIO_PORT_P6,GPIO_PIN4);
                 break;
             case 2:
-                GPIO_setOutputHighOnPin(GPIO_PORT_P2,GPIO_PIN1);
+                GPIO_setOutputHighOnPin(GPIO_PORT_P6,GPIO_PIN5);
+                GPIO_setOutputLowOnPin(GPIO_PORT_P6,GPIO_PIN4);
                 delaysecs(DELAY);
-                GPIO_setOutputLowOnPin(GPIO_PORT_P2,GPIO_PIN1);
+                GPIO_setOutputLowOnPin(GPIO_PORT_P6,GPIO_PIN5);
                 break;
             case 3:
-                GPIO_setOutputHighOnPin(GPIO_PORT_P2,GPIO_PIN2);
-                delaysecs(DELAY);
-                GPIO_setOutputLowOnPin(GPIO_PORT_P2,GPIO_PIN2);
+                GPIO_setOutputHighOnPin(GPIO_PORT_P6,GPIO_PIN4);
+                GPIO_setOutputHighOnPin(GPIO_PORT_P6,GPIO_PIN5);
                 break;
         }
         delaysecs(DELAY);
