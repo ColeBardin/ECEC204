@@ -2,3 +2,6 @@
 .metadata
 .jxbrowser.userdata
 RemoteSystemsTempFiles
+*/.launches
+*/.settings
+*/.debug
