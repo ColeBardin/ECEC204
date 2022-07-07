@@ -9,9 +9,7 @@ uint8_t countBits (uint8_t v)
 {
     uint8_t count = 0;
 
-    uint8_t copy;
-    uint8_t index;
-    uint8_t mask;
+    uint8_t copy, index, mask;
 
     for (index=0; index<8; index++) {
         mask = 1;
@@ -20,7 +18,6 @@ uint8_t countBits (uint8_t v)
             count++;
         }
     }
-    /* FIXME: Write your code here. */
 
     return count;
 }
@@ -36,8 +33,6 @@ int isPowerOfTwo (uint8_t v)
         }
         v = v/2;
     }
-
-    /* FIXME: Write your code here. */
 
     return status;
 }

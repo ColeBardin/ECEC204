@@ -73,7 +73,6 @@ EUSCIA0_IRQHandler (void)
 void
 writeHex (int value)
 {
-    /* FIXME: Write your code here. */
     char buf[BUFFER_SIZE];
     sprintf(buf, "0x%x", value);
     writeString(buf);
