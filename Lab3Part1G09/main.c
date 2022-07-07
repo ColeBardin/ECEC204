@@ -12,10 +12,10 @@
 #define SWITCH_PRESSED 2
 #define SWITCH_RELEASED 3
 #define DELAY 1000
-#define NUMBER 750000
+#define NUMBER 500000
 #define D_INTERVAL 0.2
 
-float led_period = 1.0;
+unsigned int led_period = 5;
 
 /* Function prototype definitions. */
 unsigned int getSwitchState (void);
@@ -101,6 +101,7 @@ int main(void)
     /* Stop Watchdog  */
     MAP_WDT_A_holdTimer();
 
+    /* Buffer for formatted string */
     char message[128];
     unsigned int switchState = SWITCH_RELEASED;
 
@@ -114,29 +115,30 @@ int main(void)
     Interrupt_enableInterrupt(INT_EUSCIA0);
     Interrupt_enableMaster();
 
-    GPIO_setAsOutputPin(GPIO_PORT_P2, GPIO_PIN0);
-    GPIO_setAsInputPinWithPullUpResistor (GPIO_PORT_P1, GPIO_PIN1);
+    GPIO_setAsOutputPin(GPIO_PORT_P2, GPIO_PIN0); /* Register P2.0 as output (LED2 Red) */
+    GPIO_setAsInputPinWithPullUpResistor (GPIO_PORT_P1, GPIO_PIN1); /* Register P1.1 as input (Switch 1) */
 
-    sprintf(message, "LED Period is %f", led_period);
+    /* Display initial status of led_period to screen */
+    sprintf(message, "led_period is %d", led_period);
     putString(message);
 
     do {
-        delaysecs(led_period);
+        delaysecs( (float)(led_period)*D_INTERVAL ); /* Delay the board operation for led_period*0.2 seconds */
         GPIO_toggleOutputOnPin(GPIO_PORT_P2, GPIO_PIN0);
         /* Obtain the debounced state of switch. */
-        switchState = getDebouncedSwitchState (switchState);
-        if (switchState == SWITCH_PRESSED) {
-            if (led_period < 0.21) {
-                led_period = 1.0;
+        switchState = getDebouncedSwitchState (switchState); /* Debounce the switch */
+        if (switchState == SWITCH_PRESSED) { /* If pressed */
+            if (led_period == 1) { /* Reset back to period 5 after period 1 */
+                led_period = 5;
             } else {
-                led_period -= D_INTERVAL;
+                led_period--; /* Decrement the period if it is not 1 */
             }
-            sprintf(message, "LED Period is %f", led_period);
+            /* When changing the period, display new period to screen */
+            sprintf(message, "led_period is %d", led_period);
             putString(message);
             /* Wait for switch to be released. */
             while (getDebouncedSwitchState (switchState) != SWITCH_RELEASED);
             switchState = SWITCH_RELEASED;
-
         }
     }
     while(1);
