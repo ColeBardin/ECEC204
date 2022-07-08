@@ -15,6 +15,12 @@
 
 #define NUMBER  500000
 #define DELAY   0.2
+#define SWITCH_PRESSED 2
+#define SWITCH_RELEASED 3
+
+/* Function prototype definitions. */
+unsigned int getSwitchState (int port, int pin);
+unsigned int getDebouncedSwitchState (unsigned int previousState, int port, int pin);
 
 const eUSCI_UART_ConfigV1 uartConfig=   // For CCSv9 and CCSv10 have UART_ConfigV1
 {
@@ -28,6 +34,45 @@ const eUSCI_UART_ConfigV1 uartConfig=   // For CCSv9 and CCSv10 have UART_Config
      EUSCI_A_UART_MODE,
      EUSCI_A_UART_OVERSAMPLING_BAUDRATE_GENERATION
 };
+
+unsigned int getSwitchState (int port, int pin)
+{
+    if  (GPIO_getInputPinValue(port, pin) == GPIO_INPUT_PIN_LOW)
+        return SWITCH_PRESSED;
+    else
+        return SWITCH_RELEASED;
+}
+
+unsigned int getDebouncedSwitchState (unsigned int previousState, int port, int pin)
+{
+    unsigned int currentState = getSwitchState(port, pin); /* Get current state of the switch. */
+    if (currentState == previousState) /* State is unchanged. */
+        return previousState;
+
+    /* Instantaneous state has changed. Wait for it to stabilize using
+     * debouncing algorithm. The state has to remain unchanged for four
+     * consecutive sampling periods. */
+    unsigned int i = 0, j = 0;
+    unsigned int nextState;
+
+    while (j != 0x001E) {
+        nextState = getSwitchState (port, pin);
+        if (currentState == nextState) {
+            j |= 0x0001;
+            j = j << 1;
+        }
+        else
+            j = 0;
+
+        currentState = nextState;
+
+        /* Delay. Needs to be tuned by programmer for the debounce
+         * algorithm to work correctly. Usually switch specific. */
+        for (i = DELAY; i > 0; i--);
+    }
+
+    return currentState;
+}
 
 void delaysecs(float secs) {
     uint32_t i;
@@ -77,24 +122,55 @@ int main(void) {
 
     while(1)
     {
-        s1 = GPIO_getInputPinValue(GPIO_PORT_P6, GPIO_PIN0);
-        s2 = GPIO_getInputPinValue(GPIO_PORT_P6, GPIO_PIN1);
-        if ( (s1==GPIO_INPUT_PIN_LOW) & (s2==GPIO_INPUT_PIN_LOW) ){
-            putString("State: 3");
-            state = 3;
+        s1 = getDebouncedSwitchState(s1, GPIO_PORT_P6, GPIO_PIN0);
+
+        if (s1 == SWITCH_PRESSED) {
+            switch (state) {
+                case 0:
+                    state = 1;
+                    putString("State: 1");
+                    break;
+                case 1:
+                    state = 0;
+                    putString("State: 0");
+                    break;
+                case 2:
+                    state = 3;
+                    putString("State: 3");
+                    break;
+                case 3:
+                    state = 2;
+                    putString("State: 2");
+                    break;
+            }
+            while (getDebouncedSwitchState(s1, GPIO_PORT_P6, GPIO_PIN0) != SWITCH_RELEASED);
+            s1 = SWITCH_RELEASED;
         }
-        else if ( s1==GPIO_INPUT_PIN_LOW ) {
-            putString("State: 2");
-            state = 2;
-        }
-        else if ( s2==GPIO_INPUT_PIN_LOW ) {
-            putString("State: 1");
-            state = 1;
-        }
-        else {
-            putString("State: 0");
-            state = 0;
-        }
+
+        s2 = getDebouncedSwitchState(s2, GPIO_PORT_P6, GPIO_PIN1);
+        if (s2 == SWITCH_PRESSED) {
+                    switch (state) {
+                        case 0:
+                            state = 2;
+                            putString("State: 2");
+                            break;
+                        case 1:
+                            state = 3;
+                            putString("State: 3");
+                            break;
+                        case 2:
+                            state = 0;
+                            putString("State: 0");
+                            break;
+                        case 3:
+                            state = 1;
+                            putString("State: 1");
+                            break;
+                    }
+                    while (getDebouncedSwitchState(s1, GPIO_PORT_P6, GPIO_PIN1) != SWITCH_RELEASED);
+                    s2 = SWITCH_RELEASED;
+                }
+
         switch (state) {
             case 0:
                 GPIO_setOutputLowOnPin(GPIO_PORT_P6,GPIO_PIN4);
