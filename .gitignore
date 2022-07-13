@@ -14,4 +14,8 @@ dtv
 */.settings
 */.debug
 *.launch
+Debug
 */Debug
+*/Debug/
+*Debug*
+Debug
