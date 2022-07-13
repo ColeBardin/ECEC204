@@ -82,6 +82,7 @@ int main(void)
 
 
 void PORT1_IRQHandler(void) {
+    /* TODO: Debounce here */
     uint32_t status;
     status = GPIO_getEnabledInterruptStatus(GPIO_PORT_P1);
     GPIO_clearInterruptFlag(GPIO_PORT_P1, status);
