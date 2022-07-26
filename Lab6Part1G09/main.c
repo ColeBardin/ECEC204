@@ -101,17 +101,17 @@ int main(void) {
     CS_setExternalClockSourceFrequency(32000,CS_48MHZ);
     CS_startHFXT(false);
     CS_initClockSignal(CS_MCLK,CS_HFXTCLK_SELECT,CS_CLOCK_DIVIDER_1);
-
+    /* Make P1.0 an output and set it to LOW */
     GPIO_setAsOutputPin(GPIO_PORT_P1,GPIO_PIN0);
     GPIO_setOutputLowOnPin(GPIO_PORT_P1,GPIO_PIN0);
-
+    /* Initialize 32 bit timer module */
     Timer32_initModule(TIMER32_0_BASE,TIMER32_PRESCALER_16,TIMER32_32BIT,TIMER32_PERIODIC_MODE);
     Timer32_setCount(TIMER32_0_BASE,TIMER_PERIOD);
-
+    /* Enable interrupt settings */
     Interrupt_enableSleepOnIsrExit();
     Interrupt_enableInterrupt(TIMER32_0_INTERRUPT);
     Timer32_enableInterrupt(TIMER32_0_BASE);
-
+    /* Begin timer */
     Timer32_startTimer(TIMER32_0_BASE,false);
     PCM_setPowerState(PCM_LPM0_LDO_VCORE1);
 
