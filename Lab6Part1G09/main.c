@@ -115,23 +115,15 @@ int main(void) {
     Timer32_startTimer(TIMER32_0_BASE,false);
     PCM_setPowerState(PCM_LPM0_LDO_VCORE1);
 
-    /* Make interrupt handler for P1.4 */
-    GPIO_setAsInputPinWithPullUpResistor(GPIO_PORT_P1, GPIO_PIN4);
-    GPIO_interruptEdgeSelect(GPIO_PORT_P1, GPIO_PIN4, GPIO_LOW_TO_HIGH_TRANSITION); /* Enables P1.1 for interrupt */
-    GPIO_clearInterruptFlag(GPIO_PORT_P1, GPIO_PIN4);
-    GPIO_enableInterrupt(GPIO_PORT_P1, GPIO_PIN4);
-    /* Make interrupt handler for P1.1 */
-    GPIO_setAsInputPinWithPullUpResistor(GPIO_PORT_P1, GPIO_PIN1);
-    GPIO_interruptEdgeSelect(GPIO_PORT_P1, GPIO_PIN1, GPIO_LOW_TO_HIGH_TRANSITION); /* Enables P1.4 for interrupt */
-    GPIO_clearInterruptFlag(GPIO_PORT_P1, GPIO_PIN1);
-    GPIO_enableInterrupt(GPIO_PORT_P1, GPIO_PIN1);
+    /* Set switch pins as inputs with pullup resistors */
+    GPIO_setAsInputPinWithPullUpResistor (GPIO_PORT_P1, GPIO_PIN1|GPIO_PIN4); /* Register P1.1 and P1.4 as pulled up inputs */
+    /* Make interrupt handler for P1.4 and P1.1 */
+    GPIO_interruptEdgeSelect(GPIO_PORT_P1, GPIO_PIN1|GPIO_PIN4, GPIO_LOW_TO_HIGH_TRANSITION);
+    GPIO_clearInterruptFlag(GPIO_PORT_P1, GPIO_PIN1|GPIO_PIN4);
+    GPIO_enableInterrupt(GPIO_PORT_P1, GPIO_PIN1|GPIO_PIN4);
     /* Enable interrupting */
     Interrupt_enableInterrupt(INT_PORT1); /* Port 1 */
     Interrupt_enableMaster();
-
-    /* Set switch pins as inputs with pullup resistors */
-    GPIO_setAsInputPinWithPullUpResistor (GPIO_PORT_P1, GPIO_PIN1); /* Register P1.1 as input (Switch 1) */
-    GPIO_setAsInputPinWithPullUpResistor (GPIO_PORT_P1, GPIO_PIN4); /* Register P1.4 as input (Switch 2) */
 
     while(1) {
         /* TODO: Handle flag not being clear */
