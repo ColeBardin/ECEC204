@@ -55,8 +55,7 @@ unsigned int getSwitchState (int port, int pin)
         return SWITCH_RELEASED;
 }
 
-unsigned int getDebouncedSwitchState (unsigned int previousState, int port, int pin)
-{
+unsigned int getDebouncedSwitchState (unsigned int previousState, int port, int pin) {
     unsigned int currentState = getSwitchState(port, pin); /* Get current state of the switch. */
     if (currentState == previousState) /* State is unchanged. */
         return previousState;

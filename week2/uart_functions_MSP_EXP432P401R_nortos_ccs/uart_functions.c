@@ -19,8 +19,7 @@
  * at: software-dl.ti.com/msp430/msp430_public_sw/mcu/msp430/MSP430BaudRateConverter/index.html
  */
 
-const eUSCI_UART_ConfigV1 uartConfig =
-{
+const eUSCI_UART_ConfigV1 uartConfig = {
      EUSCI_A_UART_CLOCKSOURCE_SMCLK,          // SMCLK Clock Source
      78,                                      // BRDIV = 78
      2,                                       // UCxBRF = 2
@@ -41,9 +40,7 @@ struct ringBuffer_t {
 struct ringBuffer_t ringBuffer;
 
 /* EUSCI A0 UART ISR - receives data from the host PC. */
-void
-EUSCIA0_IRQHandler (void)
-{
+void EUSCIA0_IRQHandler (void) {
     char c;
 
     /* Obtain the current interrupt status of the UART. */
@@ -70,9 +67,7 @@ EUSCIA0_IRQHandler (void)
 }
 
 /* Read a floating-point value from the UART. */
-void
-readFloat (float *value)
-{
+void readFloat (float *value) {
     char buf[BUFFER_SIZE];
     readString (buf);
     *value = atof (buf); /* Convert ASCII to floating-point data type. */
@@ -80,9 +75,7 @@ readFloat (float *value)
 }
 
 /* Write a floating-point value to the UART. */
-void
-writeFloat (float value)
-{
+void writeFloat (float value) {
     char buf[BUFFER_SIZE];
     double temp, integer_part, fractional_part;
 
@@ -102,9 +95,7 @@ writeFloat (float value)
 }
 
 /* Read an integer from the terminal via the UART. */
-void
-readInt (int *value)
-{
+void readInt (int *value) {
     char buf[BUFFER_SIZE];
     readString (buf);
     *value = atoi (buf); /* Convert ASCII to integer data type. */
@@ -112,9 +103,7 @@ readInt (int *value)
 }
 
 /* Write an integer value to the UART. */
-void
-writeInt (int value)
-{
+void writeInt (int value) {
     char buf[BUFFER_SIZE];
     sprintf (buf, "%d", value); /* Convert integer data type to ASCII. */
     writeString (buf);
@@ -124,9 +113,7 @@ writeInt (int value)
 /* Function reads the characters received by the UART and constructs the
  * resulting string.
  */
-void
-readString (char *buffer)
-{
+void readString (char *buffer) {
     char c;
     char *ptr = buffer;
 
@@ -154,9 +141,7 @@ readString (char *buffer)
 
 /* Function writes the provided string to the UART. We print out one
  * character at a time to the UART until the end of string is reached. */
-void
-writeString (char *buffer)
-{
+void writeString (char *buffer) {
     MAP_UART_transmitData (EUSCI_A0_BASE, '\n');
     MAP_UART_transmitData (EUSCI_A0_BASE, '\r');
 
@@ -173,9 +158,7 @@ writeString (char *buffer)
 
 
 
-void
-initUART (void)
-{
+void initUART (void) {
     /* Initialize the ring buffer. */
     ringBuffer.in = 0;
     ringBuffer.out = 0;
