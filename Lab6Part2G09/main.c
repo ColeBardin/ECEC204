@@ -9,6 +9,16 @@
 /* User-defined includes. */
 #include "uart_functions.h"
 
+#define SWITCH_PRESSED 2
+#define SWITCH_RELEASED 3
+#define DELAY 0.1
+
+uint16_t count1, count2;
+float time;
+uint8_t s1, s2;
+uint8_t flag=0;
+uint16_t n=0;
+
 /* Configuration for timer in continuous mode. */
 const Timer_A_ContinuousModeConfig continuousModeConfig = {
     TIMER_A_CLOCKSOURCE_ACLK, // Clock source
@@ -17,14 +27,47 @@ const Timer_A_ContinuousModeConfig continuousModeConfig = {
     TIMER_A_DO_CLEAR
 };
 
+unsigned int getSwitchState (int port, int pin) {
+    if  (GPIO_getInputPinValue(port, pin) == GPIO_INPUT_PIN_LOW)
+        return SWITCH_PRESSED;
+    else
+        return SWITCH_RELEASED;
+}
+
+unsigned int getDebouncedSwitchState (unsigned int previousState, int port, int pin) {
+    unsigned int currentState = getSwitchState(port, pin); /* Get current state of the switch. */
+    if (currentState == previousState) { /* State is unchanged. */
+        return previousState;
+    }
+    /* Instantaneous state has changed. Wait for it to stabilize using
+     * debouncing algorithm. The state has to remain unchanged for four
+     * consecutive sampling periods. */
+    unsigned int i = 0, j = 0;
+    unsigned int nextState;
+
+    while (j != 0x001E) {
+        nextState = getSwitchState (port, pin);
+        if (currentState == nextState) {
+            j |= 0x0001;
+            j = j << 1;
+        }
+        else
+            j = 0;
+        currentState = nextState;
+        /* Delay. Needs to be tuned by programmer for the debounce
+         * algorithm to work correctly. Usually switch specific. */
+        for (i = DELAY; i > 0; i--);
+    }
+    return currentState;
+}
+
 void delay (uint8_t msecs) {
     uint32_t i;
     for (i = 0;i < 275 * msecs; i++);
     return;
 }
 
-int main(void)
-{
+int main(void) {
     /* Stop Watchdog  */
     MAP_WDT_A_holdTimer();
 
@@ -46,18 +89,53 @@ int main(void)
     GPIO_setAsInputPinWithPullUpResistor (GPIO_PORT_P1, GPIO_PIN1);
     GPIO_setAsInputPinWithPullUpResistor (GPIO_PORT_P1, GPIO_PIN4);
 
-    /* FIXME: Configure and start Timer_A0. Configure the interrupt processing system. */
+    /* Enable LED1 to display after S1 is pressed */
+    GPIO_setAsOutputPin(GPIO_PORT_P1, GPIO_PIN0);
+    GPIO_setOutputLowOnPin(GPIO_PORT_P1, GPIO_PIN0);
 
-    /* FIXME: Capture and calculate the elapsed time between button presses. */
-
-    /* FIXME: Display elapsed time on terminal, rounded to the nearest second. */
+    /* Configure Timer_A0 in continuous-mode. */
+    Timer_A_configureContinuousMode(TIMER_A0_BASE, &continuousModeConfig);
+    /* Enable the interrupt processing system for the timer. */
+    Interrupt_enableInterrupt(INT_TA0_N); // Invoke ISR when Timer_A0 resets to zero
+    /* Start the timers. */
+    Timer_A_startCounter(TIMER_A0_BASE, TIMER_A_CONTINUOUS_MODE);
 
     while(1) {
-        
+        if (flag){
+            /* Debounce S2 */
+            s2 = getDebouncedSwitchState(s2, GPIO_PORT_P1, GPIO_PIN4);
+            if (s2 == SWITCH_PRESSED) {
+                while (getDebouncedSwitchState(s2, GPIO_PORT_P1, GPIO_PIN4) != SWITCH_RELEASED);
+                s2 = SWITCH_RELEASED;
+                flag=0;
+                count2=Timer_A_getCounterValue(TIMER_A0_BASE);
+                GPIO_setOutputLowOnPin(GPIO_PORT_P1, GPIO_PIN0);
+                /* FIXME: Display elapsed time on terminal, rounded to the nearest second. */
+                time = (float)(n*0xFFFF+count2-count1)/32000.0;
+                writeFloat(time);
+            }
+        }
+        /* Debounce S1 */
+        s1 = getDebouncedSwitchState(s1, GPIO_PORT_P1, GPIO_PIN1);
+        if (s1 == SWITCH_PRESSED) {
+            while (getDebouncedSwitchState(s1, GPIO_PORT_P1, GPIO_PIN1) != SWITCH_RELEASED);
+            s1 = SWITCH_RELEASED;
+            count1=Timer_A_getCounterValue(TIMER_A0_BASE);
+            GPIO_setOutputHighOnPin(GPIO_PORT_P1,GPIO_PIN0);
+            flag=1;
+            n=0;
+        }
     }
 }
 
+
+/* ISR for Timer_A0 to catch the TAIFG bit. Toggle RED LED connected to P1.0.
+ * In continuous mode, the 16-bit timer counts up until it reaches its maximum value of
+ * 0xFFFF or 65535 in decimal, then restarts again from zero. The Timer\_A Interrupt FlaG
+ * or TAIFG bit is set when the counter value changes from 0xFFFF to zero, which will
+ * trigger the ISR below. */
 void TA0_N_IRQHandler (void) {
-    /* FIXME: Write ISR code to clear the TAIE interrupt and count number of overflows. */
+    Timer_A_clearInterruptFlag (TIMER_A0_BASE);
+    n++;
     return;
 }
