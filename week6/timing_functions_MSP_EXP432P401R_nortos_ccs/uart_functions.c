@@ -19,7 +19,7 @@
  * at: software-dl.ti.com/msp430/msp430_public_sw/mcu/msp430/MSP430BaudRateConverter/index.html
  */
 
-const eUSCI_UART_Config uartConfig =
+const eUSCI_UART_ConfigV1 uartConfig =
 {
      EUSCI_A_UART_CLOCKSOURCE_SMCLK,          // SMCLK Clock Source
      78,                                      // BRDIV = 78
