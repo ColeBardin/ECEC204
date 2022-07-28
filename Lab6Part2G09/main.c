@@ -101,18 +101,22 @@ int main(void) {
     Timer_A_startCounter(TIMER_A0_BASE, TIMER_A_CONTINUOUS_MODE);
 
     while(1) {
+        /* If S1 has been pressed */
         if (flag){
             /* Debounce S2 */
             s2 = getDebouncedSwitchState(s2, GPIO_PORT_P1, GPIO_PIN4);
             if (s2 == SWITCH_PRESSED) {
                 while (getDebouncedSwitchState(s2, GPIO_PORT_P1, GPIO_PIN4) != SWITCH_RELEASED);
                 s2 = SWITCH_RELEASED;
+                /* Reset flag */
                 flag=0;
+                /* Get current timer value for count2 */
                 count2=Timer_A_getCounterValue(TIMER_A0_BASE);
-                GPIO_setOutputLowOnPin(GPIO_PORT_P1, GPIO_PIN0);
-                /* FIXME: Display elapsed time on terminal, rounded to the nearest second. */
+                /* Calculate time between presses and write to UART terminal */
                 time = (float)(n*0xFFFF+count2-count1)/32000.0;
                 writeFloat(time);
+                /* Turn off Red LED */
+                GPIO_setOutputLowOnPin(GPIO_PORT_P1, GPIO_PIN0);
             }
         }
         /* Debounce S1 */
@@ -120,10 +124,13 @@ int main(void) {
         if (s1 == SWITCH_PRESSED) {
             while (getDebouncedSwitchState(s1, GPIO_PORT_P1, GPIO_PIN1) != SWITCH_RELEASED);
             s1 = SWITCH_RELEASED;
+            /* Get current timer value for count1 */
             count1=Timer_A_getCounterValue(TIMER_A0_BASE);
-            GPIO_setOutputHighOnPin(GPIO_PORT_P1,GPIO_PIN0);
+            /* Reset flag and overflow counter */
             flag=1;
             n=0;
+            /* Turn on Red LED */
+            GPIO_setOutputHighOnPin(GPIO_PORT_P1,GPIO_PIN0);
         }
     }
 }
@@ -136,6 +143,7 @@ int main(void) {
  * trigger the ISR below. */
 void TA0_N_IRQHandler (void) {
     Timer_A_clearInterruptFlag (TIMER_A0_BASE);
+    /* Increment overflow counter */
     n++;
     return;
 }
