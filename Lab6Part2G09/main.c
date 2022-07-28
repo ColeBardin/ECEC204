@@ -89,7 +89,7 @@ int main(void) {
     GPIO_setAsInputPinWithPullUpResistor (GPIO_PORT_P1, GPIO_PIN1);
     GPIO_setAsInputPinWithPullUpResistor (GPIO_PORT_P1, GPIO_PIN4);
 
-    /* Enable LED1 to display after S1 is pressed */
+    /* Enable LED1 (P1.0) to display after S1 is pressed */
     GPIO_setAsOutputPin(GPIO_PORT_P1, GPIO_PIN0);
     GPIO_setOutputLowOnPin(GPIO_PORT_P1, GPIO_PIN0);
 
@@ -113,6 +113,7 @@ int main(void) {
                 /* Get current timer value for count2 */
                 count2=Timer_A_getCounterValue(TIMER_A0_BASE);
                 /* Calculate time between presses and write to UART terminal */
+                /* TODO: Reevaluate equation */
                 time = (float)(n*0xFFFF+count2-count1)/32000.0;
                 writeFloat(time);
                 /* Turn off Red LED */
