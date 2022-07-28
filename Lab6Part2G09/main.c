@@ -1,51 +1,4 @@
-/* --COPYRIGHT--,BSD
- * Copyright (c) 2017, Texas Instruments Incorporated
- * All rights reserved.
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
- *
- * *  Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- *
- * *  Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in the
- *    documentation and/or other materials provided with the distribution.
- *
- * *  Neither the name of Texas Instruments Incorporated nor the names of
- *    its contributors may be used to endorse or promote products derived
- *    from this software without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
- * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
- * THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
- * PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR
- * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
- * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
- * PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS;
- * OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
- * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
- * OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
- * EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- * --/COPYRIGHT--*/
-/******************************************************************************
- * MSP432 Empty Project
- *
- * Description: An empty project that uses DriverLib
- *
- *                MSP432P401
- *             ------------------
- *         /|\|                  |
- *          | |                  |
- *          --|RST               |
- *            |                  |
- *            |                  |
- *            |                  |
- *            |                  |
- *            |                  |
- * Author: 
-*******************************************************************************/
+/* Lab 6 Part 2 by G09 */
 /* DriverLib Includes */
 #include <ti/devices/msp432p4xx/driverlib/driverlib.h>
 
@@ -53,13 +6,58 @@
 #include <stdint.h>
 #include <stdbool.h>
 
+/* User-defined includes. */
+#include "uart_functions.h"
+
+/* Configuration for timer in continuous mode. */
+const Timer_A_ContinuousModeConfig continuousModeConfig = {
+    TIMER_A_CLOCKSOURCE_ACLK, // Clock source
+    TIMER_A_CLOCKSOURCE_DIVIDER_1, // Divider ratio
+    TIMER_A_TAIE_INTERRUPT_ENABLE, // Enable TAIE interrupt
+    TIMER_A_DO_CLEAR
+};
+
+void delay (uint8_t msecs) {
+    uint32_t i;
+    for (i = 0;i < 275 * msecs; i++);
+    return;
+}
+
 int main(void)
 {
     /* Stop Watchdog  */
     MAP_WDT_A_holdTimer();
 
-    while(1)
-    {
+    /* Initialize the clock system. Do not change the below configuration. */
+    CS_setDCOCenteredFrequency (CS_DCO_FREQUENCY_12); // DCO = 12 MHz
+    CS_initClockSignal (CS_MCLK, CS_DCOCLK_SELECT, CS_CLOCK_DIVIDER_1);
+    CS_initClockSignal (CS_HSMCLK, CS_DCOCLK_SELECT, CS_CLOCK_DIVIDER_1);
+    CS_initClockSignal (CS_SMCLK, CS_DCOCLK_SELECT, CS_CLOCK_DIVIDER_1);
+
+    /* Initialize the low-speed auxiliary clock system. */
+    CS_setReferenceOscillatorFrequency (CS_REFO_32KHZ); // Reference oscillator is set to 32KHz
+    CS_initClockSignal (CS_ACLK, CS_REFOCLK_SELECT, CS_CLOCK_DIVIDER_1); // Auxiliary clock derives from reference
+
+    /* Initialize the UART module. */
+    initUART ();
+    writeString ("Established communication with the board");
+
+    /* Configure BUTTON1 (P1.1) and BUTTON2 (P1.4). */
+    GPIO_setAsInputPinWithPullUpResistor (GPIO_PORT_P1, GPIO_PIN1);
+    GPIO_setAsInputPinWithPullUpResistor (GPIO_PORT_P1, GPIO_PIN4);
+
+    /* FIXME: Configure and start Timer_A0. Configure the interrupt processing system. */
+
+    /* FIXME: Capture and calculate the elapsed time between button presses. */
+
+    /* FIXME: Display elapsed time on terminal, rounded to the nearest second. */
+
+    while(1) {
         
     }
+}
+
+void TA0_N_IRQHandler (void) {
+    /* FIXME: Write ISR code to clear the TAIE interrupt and count number of overflows. */
+    return;
 }
