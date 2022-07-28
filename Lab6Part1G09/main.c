@@ -96,7 +96,6 @@ int main(void) {
         //Interrupt_disableInterrupt(INT_PORT1);
         time = (float)(count1-count2)/3200000.0;
         writeFloat(time);
-        /* TODO: Compute time between presses */
         flag=0;
         }
     }
