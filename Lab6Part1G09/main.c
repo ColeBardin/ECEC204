@@ -94,6 +94,7 @@ int main(void) {
         if (flag) {
         /* Disable Port1 Interrupt */
         //Interrupt_disableInterrupt(INT_PORT1);
+            /* TODO: determine if deivider is correct */
         time = (float)(count1-count2)/3200000.0;
         writeFloat(time);
         flag=0;
