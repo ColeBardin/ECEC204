@@ -12,7 +12,7 @@
 #include "uart_functions.h"
 
 /* Size of the N x N matrix and the min and max values in the matrix. */
-#define MATRIX_SIZE 40
+#define MATRIX_SIZE 10
 #define MIN_VALUE 5
 #define MAX_VALUE 10
 
@@ -24,8 +24,8 @@ void delay (unsigned int);
 
 /* Continuous timer operation. */
 const Timer_A_ContinuousModeConfig continuousModeConfig = {
-    TIMER_A_CLOCKSOURCE_SMCLK,             // Clock source
-    TIMER_A_CLOCKSOURCE_DIVIDER_1,       // Clock divider
+    TIMER_A_CLOCKSOURCE_SMCLK,             // Clock source SMCLK
+    TIMER_A_CLOCKSOURCE_DIVIDER_1,       // Clock divider 1
     TIMER_A_TAIE_INTERRUPT_ENABLE,         // TAIE interrupt enabled
     TIMER_A_DO_CLEAR
 };
@@ -45,7 +45,7 @@ int main (void) {
 
     /* Initialize the high-speed clock system. */
     CS_setDCOCenteredFrequency (CS_DCO_FREQUENCY_12); // Set DCO to 12 MHz
-    CS_initClockSignal (CS_MCLK, CS_DCOCLK_SELECT, CS_CLOCK_DIVIDER_1);
+    CS_initClockSignal (CS_MCLK, CS_DCOCLK_SELECT, CS_CLOCK_DIVIDER_16); /* MCLK, freq = 12 MHz / divider */
     CS_initClockSignal (CS_HSMCLK, CS_DCOCLK_SELECT, CS_CLOCK_DIVIDER_1);
     CS_initClockSignal (CS_SMCLK, CS_DCOCLK_SELECT, CS_CLOCK_DIVIDER_1); // Set SMCLK to 12MHz for UART comms.
 
@@ -69,16 +69,15 @@ int main (void) {
         writeString ("\n\rMultiplying matrices");
 
         tic (); /* Time the multiplication operation. */
-        //matrixMult(A, B, C, MATRIX_SIZE);
-        delay(1000);
+        matrixMult(A, B, C, MATRIX_SIZE);
         toc();
 
-        //writeString ("\n\rDone multiplying");
+        writeString ("\n\rDone multiplying");
 
         /* Display elapsed time on the terminal. */
         writeFloat(elapsedTime);
 
-        //delay (1000); /* Delay 1s before starting again. */
+        delay (1000); /* Delay 1s before starting again. */
    }
 }
 
@@ -112,7 +111,6 @@ void matrixMult (int *A, int *B, int *C, unsigned int dim) {
 
 /* The tic function. */
 void tic (void) {
-    /* FIXME: Complete the function. */
     count1 = Timer_A_getCounterValue(TIMER_A0_BASE);
     overflow=0;
     return;
@@ -120,9 +118,8 @@ void tic (void) {
 
 /* The toc function. */
 void toc (void) {
-    /* FIXME: Complete the function. */
     count2 = Timer_A_getCounterValue(TIMER_A0_BASE);
-    elapsedTime = (float)( count2 - count1 + 0xFFFF*overflow ) / 12000.0;
+    elapsedTime = (float)( count2 - count1 + 0xFFFF*overflow ) / (12000.0f);
     return;
 }
 
@@ -130,7 +127,7 @@ void toc (void) {
 /* Function implements a delay for the specified number of millseconds. */
 void delay (unsigned int msecs) {
     unsigned int i;
-    for (i = 0; i < 750 * msecs; i++);
+    for (i = 0; i < 275 * msecs; i++);
     return;
 }
 
