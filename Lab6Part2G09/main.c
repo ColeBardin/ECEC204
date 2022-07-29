@@ -114,7 +114,7 @@ int main(void) {
                 count2=Timer_A_getCounterValue(TIMER_A0_BASE);
                 /* Calculate time between presses and write to UART terminal */
                 /* TODO: Reevaluate equation */
-                time = (float)(n*0xFFFF+count2-count1)/32000.0;
+                time = (float)(n*0xFFFF+count2-count1) / 32000.0; /* Divider and prescaler = 1, so frequency is 32 KHz */
                 writeFloat(time);
                 /* Turn off Red LED */
                 GPIO_setOutputLowOnPin(GPIO_PORT_P1, GPIO_PIN0);
