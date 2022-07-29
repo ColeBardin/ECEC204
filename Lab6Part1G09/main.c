@@ -95,7 +95,7 @@ int main(void) {
         /* Disable Port1 Interrupt */
         //Interrupt_disableInterrupt(INT_PORT1);
             /* TODO: determine if deivider is correct */
-        time = (float)(count1-count2)/3200000.0;
+        time = (float)(count1-count2)/3200000.0; /* divided by 3,200,000 because 48 MHz / 16 prescaler = 3.2 MHz */
         writeFloat(time);
         flag=0;
         }
