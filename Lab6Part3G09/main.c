@@ -12,7 +12,7 @@
 #include "uart_functions.h"
 
 /* Size of the N x N matrix and the min and max values in the matrix. */
-#define MATRIX_SIZE 10
+#define MATRIX_SIZE 40
 #define MIN_VALUE 5
 #define MAX_VALUE 10
 
@@ -24,7 +24,7 @@ void delay (unsigned int);
 
 /* Continuous timer operation. */
 const Timer_A_ContinuousModeConfig continuousModeConfig = {
-    TIMER_A_CLOCKSOURCE_SMCLK,             // Clock source SMCLK
+    TIMER_A_CLOCKSOURCE_ACLK,             // Clock source ACLK
     TIMER_A_CLOCKSOURCE_DIVIDER_1,       // Clock divider 1
     TIMER_A_TAIE_INTERRUPT_ENABLE,         // TAIE interrupt enabled
     TIMER_A_DO_CLEAR
@@ -45,9 +45,14 @@ int main (void) {
 
     /* Initialize the high-speed clock system. */
     CS_setDCOCenteredFrequency (CS_DCO_FREQUENCY_12); // Set DCO to 12 MHz
-    CS_initClockSignal (CS_MCLK, CS_DCOCLK_SELECT, CS_CLOCK_DIVIDER_16); /* MCLK, freq = 12 MHz / divider */
+    CS_initClockSignal (CS_MCLK, CS_DCOCLK_SELECT, CS_CLOCK_DIVIDER_1); /* MCLK, freq = 12 MHz / divider */
     CS_initClockSignal (CS_HSMCLK, CS_DCOCLK_SELECT, CS_CLOCK_DIVIDER_1);
     CS_initClockSignal (CS_SMCLK, CS_DCOCLK_SELECT, CS_CLOCK_DIVIDER_1); // Set SMCLK to 12MHz for UART comms.
+
+    /* Set REFO to 128 KHz */
+    CS_setReferenceOscillatorFrequency(CS_REFO_128KHZ);
+    /* Initialize ACLK of REFO with Divider of 1, so freq ACLK = 128 KHz */
+    CS_initClockSignal (CS_ACLK, CS_REFOCLK_SELECT, CS_CLOCK_DIVIDER_1);
 
     /* Configure Timer_A0 in continuous-mode. */
     Timer_A_configureContinuousMode(TIMER_A0_BASE, &continuousModeConfig);
@@ -68,12 +73,14 @@ int main (void) {
 
         writeString ("\n\rMultiplying matrices");
 
-        tic (); /* Time the multiplication operation. */
+        tic (); /* Start timer */
         matrixMult(A, B, C, MATRIX_SIZE);
-        toc();
+        toc(); /* Stop timer */
 
         writeString ("\n\rDone multiplying");
 
+        /* Calculate elapsted time with overflow, frequency of Timer A = ALCK = 128 KHz. Scale by 1000 to convert to ms */
+        elapsedTime = (float)( count2 - count1 + 0xFFFF*overflow ) / (128.0f);
         /* Display elapsed time on the terminal. */
         writeFloat(elapsedTime);
 
@@ -111,6 +118,7 @@ void matrixMult (int *A, int *B, int *C, unsigned int dim) {
 
 /* The tic function. */
 void tic (void) {
+    /* Get starting time and set overflow counter to 0 */
     count1 = Timer_A_getCounterValue(TIMER_A0_BASE);
     overflow=0;
     return;
@@ -118,8 +126,8 @@ void tic (void) {
 
 /* The toc function. */
 void toc (void) {
+    /* Get ending time */
     count2 = Timer_A_getCounterValue(TIMER_A0_BASE);
-    elapsedTime = (float)( count2 - count1 + 0xFFFF*overflow ) / (12000.0f);
     return;
 }
 
