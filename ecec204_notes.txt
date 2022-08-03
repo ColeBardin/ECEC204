@@ -133,3 +133,45 @@ void Interrupt_setPriorityMask (uint8_t priorityMask)
 void Interrupt_setVectorTableAddress (uint32_t addr)
 void Interrupt_unpendInterrupt (uint32_t interruptNumber)
 void Interrupt_unregisterInterrupt (uint32_t interruptNumber)
+
+
+
+
+
+Counters and Timers:
+
+Pusle width module
+For counting in continuous mode there are 7 capture and compare registers (CCR0-CCR6)
+CCR0 Is the max value for periodic mode
+CCRs can be matched to an interrupt
+
+Set Reset Method:
+first CCR sets the value 
+CCR0 resets the value
+
+timer A up mode config:
+registers int for when timer is 0 or at max
+give max value
+
+timer A compare mode config:
+regisers int for when timer in arbitrary value
+give intermediate interrupt value
+set_reset or reset_set to determine mode
+
+
+setup to do in main:
+see PWD BY COMPARE ON ANY PIN ccs project
+
+int handlers are:
+TA0_0_IRQHandler(void) /* interrupt when timer is at top */
+TA0_N_IRQHandler(void) /* default for timer any other value
+						 defaults to bottom but will also exe if capture mode is configured */
+
+TA0_N int can be displayed for be disabled for when timer is at bottom in timer a up mode config
+
+
+Compare on TA0.1
+difference is interrupts are not written explicitely
+in timer A capture mode config: capture compare int disabled
+in timer A upmode config: TA0_0 and TA0_N are disabpled
+in main: enable specific pin for compare pin
