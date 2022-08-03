@@ -21,6 +21,9 @@ Debug
 *Debug*
 Debug
 *.prefs
+*.project
+*.cproject
+*.ccsproject
 
 # ASV files
 *.asv
