@@ -6,8 +6,8 @@
 #include <stdint.h>
 #include <stdbool.h>
 
-#define TIMER_PERIOD_0 128
-#define TIMER_PERIOD_1  16
+#define TIMER_PERIOD_0 600 /* 3 MHz of SMCLK / 5000 Hz for frequency of LED */
+#define TIMER_PERIOD_1  390 /* 35% duty cycle with SET RESET mode: OFF for 0-390 (600*0.65) and ON for 390-600 (600-600*0.35) */
 
 const Timer_A_CompareModeConfig compareModeConfig=
     {
@@ -22,7 +22,7 @@ const Timer_A_CompareModeConfig compareModeConfig=
 
 const Timer_A_UpModeConfig upConfig=
 {
- TIMER_A_CLOCKSOURCE_ACLK,
+ TIMER_A_CLOCKSOURCE_SMCLK,
  TIMER_A_CLOCKSOURCE_DIVIDER_1,
  TIMER_PERIOD_0,
  TIMER_A_TAIE_INTERRUPT_DISABLE,// interrupt when counter reaches 0, ISR is TAx_N
@@ -37,12 +37,12 @@ int main(void)
     PCM_setPowerState(PCM_AM_LF_VCORE0);
     //J.0 is Pin 41 LFXIN
     GPIO_setAsPeripheralModuleFunctionOutputPin(GPIO_PORT_PJ, GPIO_PIN0|GPIO_PIN1,GPIO_PRIMARY_MODULE_FUNCTION);
-    //P2.4 is the compare pin for Timer A0,CCR1 (TA0.1)
-    GPIO_setAsPeripheralModuleFunctionOutputPin(GPIO_PORT_P2, GPIO_PIN4,GPIO_PRIMARY_MODULE_FUNCTION);
+    //P5.7 is the compare pin for Timer A2,CCR2 (TA2.2)
+    GPIO_setAsPeripheralModuleFunctionOutputPin(GPIO_PORT_P2, GPIO_PIN4, GPIO_PRIMARY_MODULE_FUNCTION);
 
     CS_setExternalClockSourceFrequency(32768,48000000);
     CS_startLFXT(CS_LFXT_DRIVE3);
-    CS_initClockSignal(CS_ACLK,CS_LFXTCLK_SELECT, CS_CLOCK_DIVIDER_1);
+    CS_initClockSignal(CS_SMCLK, CS_HFXTCLK_SELECT, CS_CLOCK_DIVIDER_16); /* Set SMCLK to be 3 MHz = 48 MHz / 16 */
 
     Timer_A_configureUpMode(TIMER_A0_BASE, &upConfig);
     Timer_A_initCompare(TIMER_A0_BASE, &compareModeConfig);
