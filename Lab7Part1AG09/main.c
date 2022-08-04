@@ -38,15 +38,15 @@ int main(void)
     //J.0 is Pin 41 LFXIN
     GPIO_setAsPeripheralModuleFunctionOutputPin(GPIO_PORT_PJ, GPIO_PIN0|GPIO_PIN1,GPIO_PRIMARY_MODULE_FUNCTION);
     //P5.7 is the compare pin for Timer A2,CCR2 (TA2.2)
-    GPIO_setAsPeripheralModuleFunctionOutputPin(GPIO_PORT_P2, GPIO_PIN4, GPIO_PRIMARY_MODULE_FUNCTION);
+    GPIO_setAsPeripheralModuleFunctionOutputPin(GPIO_PORT_P5, GPIO_PIN7, GPIO_PRIMARY_MODULE_FUNCTION);
 
     CS_setExternalClockSourceFrequency(32768,48000000);
     CS_startHFXT(false); /* Start HFXTCLK without bypass */
     CS_initClockSignal(CS_SMCLK, CS_HFXTCLK_SELECT, CS_CLOCK_DIVIDER_16); /* Set SMCLK to be 3 MHz = 48 MHz / 16 */
 
-    Timer_A_configureUpMode(TIMER_A0_BASE, &upConfig);
-    Timer_A_initCompare(TIMER_A0_BASE, &compareModeConfig);
-    Timer_A_startCounter(TIMER_A0_BASE, TIMER_A_UP_MODE);
+    Timer_A_configureUpMode(TIMER_A2_BASE, &upConfig);
+    Timer_A_initCompare(TIMER_A2_BASE, &compareModeConfig);
+    Timer_A_startCounter(TIMER_A2_BASE, TIMER_A_UP_MODE);
 
     PCM_setPowerState(PCM_LPM0_LDO_VCORE1);
 
