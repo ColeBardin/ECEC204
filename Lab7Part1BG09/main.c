@@ -34,6 +34,7 @@ int main(void)
     PCM_setPowerState(PCM_AM_LF_VCORE0);
     GPIO_setAsPeripheralModuleFunctionOutputPin(GPIO_PORT_PJ, GPIO_PIN0|GPIO_PIN1,GPIO_PRIMARY_MODULE_FUNCTION);
 
+    /* TODO: Change output to P1.6 for lab */
     GPIO_setAsOutputPin(GPIO_PORT_P2, GPIO_PIN2);
     GPIO_setOutputLowOnPin(GPIO_PORT_P2, GPIO_PIN2);
 
@@ -58,6 +59,7 @@ int main(void)
 
 }
 
+/* TODO: Change to P1.6 for lab */
 void TA0_0_IRQHandler(void)
 {
     Timer_A_clearCaptureCompareInterrupt(TIMER_A0_BASE, TIMER_A_CAPTURECOMPARE_REGISTER_0);
