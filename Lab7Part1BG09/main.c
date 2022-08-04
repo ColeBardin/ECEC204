@@ -6,18 +6,16 @@
 #include <stdint.h>
 #include <stdbool.h>
 
-#define TIMER_PERIOD_0 7500 /* CCR0 value for 50 Hz: 7500 (375 KHz ACLK / 50 Hz desired LED frequency) */
-#define TIMER_PERIOD_1 5000 /* CCRN value for 25% duty cycle on 50 Hz in SET RESET mode: 5625 (7500-7500*0.25) */
+#define TIMER_PERIOD_0 640 /* CCR0 value for 50 Hz: 640 (32 KHz ACLK / 50 Hz desired LED frequency) */
+#define TIMER_PERIOD_1 480 /* CCRN value for 25% duty cycle on 50 Hz in SET RESET mode: 480 (640-0.25*640) */
 
 const Timer_A_CompareModeConfig compareModeConfig=
-    {
-     TIMER_A_CAPTURECOMPARE_REGISTER_1,
-     TIMER_A_CAPTURECOMPARE_INTERRUPT_ENABLE,
-     TIMER_A_OUTPUTMODE_SET_RESET,
-     TIMER_PERIOD_1
-    };
-
-
+{
+ TIMER_A_CAPTURECOMPARE_REGISTER_1,
+ TIMER_A_CAPTURECOMPARE_INTERRUPT_ENABLE,
+ TIMER_A_OUTPUTMODE_SET_RESET,
+ TIMER_PERIOD_1
+};
 
 const Timer_A_UpModeConfig upConfig=
 {
@@ -39,9 +37,9 @@ int main(void)
     GPIO_setAsOutputPin(GPIO_PORT_P2, GPIO_PIN2);
     GPIO_setOutputLowOnPin(GPIO_PORT_P2, GPIO_PIN2);
 
-    CS_setExternalClockSourceFrequency(32768,48000000);
-    CS_startHFXT(false); /* Start HFXTCLK without bypass */
-    CS_initClockSignal(CS_ACLK, CS_HFXTCLK_SELECT, CS_CLOCK_DIVIDER_128); /* Set ACLK to be 375 KHz = 48 MHz / 128 */
+    CS_setExternalClockSourceFrequency(128000,48000000); /* ACLK can only be based from LFXTCLK so set frequency to something divisble by 50 */
+    CS_startLFXT(CS_LFXT_DRIVE3); /* Start LFXTCLK in default mode */
+    CS_initClockSignal(CS_ACLK, CS_LFXTCLK_SELECT, CS_CLOCK_DIVIDER_4); /* Set ACLK to be 32 KHz = 128 KHz / 4 */
 
     Timer_A_configureUpMode(TIMER_A0_BASE, &upConfig);
     Timer_A_initCompare(TIMER_A0_BASE, &compareModeConfig);
