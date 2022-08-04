@@ -41,7 +41,7 @@ int main(void)
     GPIO_setAsPeripheralModuleFunctionOutputPin(GPIO_PORT_P2, GPIO_PIN4, GPIO_PRIMARY_MODULE_FUNCTION);
 
     CS_setExternalClockSourceFrequency(32768,48000000);
-    CS_startLFXT(CS_LFXT_DRIVE3);
+    CS_startHFXT(false); /* Start HFXTCLK without bypass */
     CS_initClockSignal(CS_SMCLK, CS_HFXTCLK_SELECT, CS_CLOCK_DIVIDER_16); /* Set SMCLK to be 3 MHz = 48 MHz / 16 */
 
     Timer_A_configureUpMode(TIMER_A0_BASE, &upConfig);
