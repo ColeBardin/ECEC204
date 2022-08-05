@@ -35,8 +35,8 @@ int main(void)
     GPIO_setAsPeripheralModuleFunctionOutputPin(GPIO_PORT_PJ, GPIO_PIN0|GPIO_PIN1,GPIO_PRIMARY_MODULE_FUNCTION);
 
     /* TODO: Change output to P1.6 for lab */
-    GPIO_setAsOutputPin(GPIO_PORT_P2, GPIO_PIN2);
-    GPIO_setOutputLowOnPin(GPIO_PORT_P2, GPIO_PIN2);
+    GPIO_setAsOutputPin(GPIO_PORT_P1, GPIO_PIN6);
+    GPIO_setOutputLowOnPin(GPIO_PORT_P1, GPIO_PIN6);
 
     CS_setExternalClockSourceFrequency(128000,48000000); /* ACLK can only be based from LFXTCLK so set frequency to something divisble by 50 */
     CS_startLFXT(CS_LFXT_DRIVE3); /* Start LFXTCLK in default mode */
@@ -63,12 +63,12 @@ int main(void)
 void TA0_0_IRQHandler(void)
 {
     Timer_A_clearCaptureCompareInterrupt(TIMER_A0_BASE, TIMER_A_CAPTURECOMPARE_REGISTER_0);
-    GPIO_toggleOutputOnPin(GPIO_PORT_P2, GPIO_PIN2);
+    GPIO_toggleOutputOnPin(GPIO_PORT_P1, GPIO_PIN6);
 
  }
 
 void TA0_N_IRQHandler(void)
 {
     Timer_A_clearCaptureCompareInterrupt(TIMER_A0_BASE, TIMER_A_CAPTURECOMPARE_REGISTER_1);
-    GPIO_toggleOutputOnPin(GPIO_PORT_P2, GPIO_PIN2);
+    GPIO_toggleOutputOnPin(GPIO_PORT_P1, GPIO_PIN6);
 }

@@ -7,11 +7,11 @@
 #include <stdbool.h>
 
 #define TIMER_PERIOD_0 600 /* 3 MHz of SMCLK / 5000 Hz for frequency of LED */
-#define TIMER_PERIOD_1  390 /* 35% duty cycle with SET RESET mode: OFF for 0-390 (600*0.65) and ON for 390-600 (600-600*0.35) */
+#define TIMER_PERIOD_1  10 /* 35% duty cycle with SET RESET mode: OFF for 0-390 (600*0.65) and ON for 390-600 (600-600*0.35) */
 
 const Timer_A_CompareModeConfig compareModeConfig=
     {
-     TIMER_A_CAPTURECOMPARE_REGISTER_1,
+     TIMER_A_CAPTURECOMPARE_REGISTER_2, /* For CCR2 */
      TIMER_A_CAPTURECOMPARE_INTERRUPT_DISABLE,
      TIMER_A_OUTPUTMODE_SET_RESET,
      TIMER_PERIOD_1
