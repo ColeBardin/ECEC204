@@ -7,7 +7,7 @@
 #include <stdbool.h>
 
 #define TIMER_PERIOD_0 600 /* 3 MHz of SMCLK / 5000 Hz for frequency of LED */
-#define TIMER_PERIOD_1  10 /* 35% duty cycle with SET RESET mode: OFF for 0-390 (600*0.65) and ON for 390-600 (600-600*0.35) */
+#define TIMER_PERIOD_1 390 /* 35% duty cycle with SET RESET mode: OFF for 0-390 (600*0.65) and ON for 390-600 (600-600*0.35) */
 
 const Timer_A_CompareModeConfig compareModeConfig=
     {

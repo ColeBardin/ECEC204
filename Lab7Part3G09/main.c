@@ -31,7 +31,7 @@ uint32_t j=0;
 float Timeint;
 uint32_t overflows=0;
 
-volatile uint16_t CaptureValues[10]={0,0,0,0,0,0,0,0,0,0};
+volatile uint16_t CaptureValues[2]={0,0};
 //volatile float CaptureFreq[10];
 
 int main(void)
@@ -41,7 +41,7 @@ int main(void)
     initUART();
 
     CS_setReferenceOscillatorFrequency(CS_REFO_128KHZ);
-    CS_initClockSignal(CS_ACLK,CS_REFOCLK_SELECT,CS_CLOCK_DIVIDER_64); /* ACLK at 2 KHz */
+    CS_initClockSignal(CS_ACLK,CS_REFOCLK_SELECT,CS_CLOCK_DIVIDER_16); /* ACLK at 2 KHz */
 
     GPIO_setAsPeripheralModuleFunctionInputPin(GPIO_PORT_P6, GPIO_PIN6,GPIO_PRIMARY_MODULE_FUNCTION); /* P6.6 on TA2.3 */
 
@@ -49,11 +49,10 @@ int main(void)
     Timer_A_initCapture(TIMER_A2_BASE, &captureModeConfig);
 
 
-    Timer_A_enableCaptureCompareInterrupt (TIMER_A2_BASE, TIMER_A_CAPTURECOMPARE_REGISTER_2);
+    Timer_A_enableCaptureCompareInterrupt (TIMER_A2_BASE, TIMER_A_CAPTURECOMPARE_REGISTER_3);
     Interrupt_enableInterrupt(INT_TA2_N);
-    Interrupt_enableInterrupt(INT_TA2_0);
     Interrupt_enableMaster();
-    Timer_A_clearCaptureCompareInterrupt(TIMER_A2_BASE, TIMER_A_CAPTURECOMPARE_REGISTER_2);
+    Timer_A_clearCaptureCompareInterrupt(TIMER_A2_BASE, TIMER_A_CAPTURECOMPARE_REGISTER_3);
     Timer_A_startCounter(TIMER_A2_BASE,TIMER_A_CONTINUOUS_MODE);
 
     GPIO_setAsOutputPin(GPIO_PORT_P2,GPIO_PIN1);
@@ -73,17 +72,25 @@ int main(void)
 void TA2_N_IRQHandler(void)
 {
     GPIO_toggleOutputOnPin(GPIO_PORT_P2,GPIO_PIN1);
-    CaptureValues[i]=Timer_A_getCaptureCompareCount(TIMER_A2_BASE, TIMER_A_CAPTURECOMPARE_REGISTER_2);
+    uint32_t status = Timer_A_getInterruptStatus(TIMER_A2_BASE);
 
-    if(i>0) {
-        Timeint=(float)(CaptureValues[i]-CaptureValues[i-1])/2000.0f;
-        i++;
+    /* status=0 -> overflow, stats=1 -> capture */
+    if (status == 1) {
+        Timer_A_clearInterruptFlag(TIMER_A2_BASE);
+        overflows++;
     }
-    Timer_A_clearCaptureCompareInterrupt(TIMER_A2_BASE, TIMER_A_CAPTURECOMPARE_REGISTER_2);
+    else if (status == 0) {
+        if (i==0){
+            CaptureValues[i]=Timer_A_getCaptureCompareCount(TIMER_A2_BASE, TIMER_A_CAPTURECOMPARE_REGISTER_3);
+            overflows=0;
+            i++;
+        } else if (i>0) {
+            CaptureValues[i]=Timer_A_getCaptureCompareCount(TIMER_A2_BASE, TIMER_A_CAPTURECOMPARE_REGISTER_3);
+            Timeint=(float)(CaptureValues[i]-CaptureValues[i-1])/2000.0f;
+            i=0;
+        }
+    }
 
-}
+    Timer_A_clearCaptureCompareInterrupt(TIMER_A2_BASE, TIMER_A_CAPTURECOMPARE_REGISTER_3);
 
-
-void TA2_0_IRQHandler(void){
-    return;
 }
