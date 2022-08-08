@@ -100,4 +100,3 @@ void T32_INT1_IRQHandler(void){
 
     return;
 }
-
