@@ -27,7 +27,6 @@ const Timer_A_CaptureModeConfig captureModeConfig=
 };
 
 uint8_t i=0;
-uint32_t j=0;
 float Timeint;
 uint32_t overflows=0;
 
@@ -40,14 +39,18 @@ int main(void)
 
     initUART();
 
-    CS_setReferenceOscillatorFrequency(CS_REFO_128KHZ);
-    CS_initClockSignal(CS_ACLK,CS_REFOCLK_SELECT,CS_CLOCK_DIVIDER_16); /* ACLK at 2 KHz */
-
     GPIO_setAsPeripheralModuleFunctionInputPin(GPIO_PORT_P6, GPIO_PIN6,GPIO_PRIMARY_MODULE_FUNCTION); /* P6.6 on TA2.3 */
+    CS_setDCOCenteredFrequency(CS_DCO_FREQUENCY_12);
+    CS_initClockSignal(CS_MCLK,CS_DCOCLK_SELECT,CS_CLOCK_DIVIDER_1); // MCLK 48 MHz
+    CS_initClockSignal(CS_SMCLK, CS_DCOCLK_SELECT, CS_CLOCK_DIVIDER_1);
+
+    CS_setReferenceOscillatorFrequency(CS_REFO_128KHZ);
+    CS_initClockSignal(CS_ACLK,CS_REFOCLK_SELECT,CS_CLOCK_DIVIDER_1); /* ACLK at 0.5 Hz */
+
+    writeString("Established Connection with board");
 
     Timer_A_configureContinuousMode(TIMER_A2_BASE, &continuousModeConfig);
     Timer_A_initCapture(TIMER_A2_BASE, &captureModeConfig);
-
 
     Timer_A_enableCaptureCompareInterrupt (TIMER_A2_BASE, TIMER_A_CAPTURECOMPARE_REGISTER_3);
     Interrupt_enableInterrupt(INT_TA2_N);
@@ -61,12 +64,7 @@ int main(void)
 
 
 
-    while(1)
-    {
-       j++;
-       j--;
-
-    }
+    while(1); //bp
 }
 
 void TA2_N_IRQHandler(void)
@@ -77,17 +75,17 @@ void TA2_N_IRQHandler(void)
     /* status=0 -> overflow, stats=1 -> capture */
     if (status == 1) {
         Timer_A_clearInterruptFlag(TIMER_A2_BASE);
-        overflows++;
+        overflows++; //bp
     }
     else if (status == 0) {
         if (i==0){
             CaptureValues[i]=Timer_A_getCaptureCompareCount(TIMER_A2_BASE, TIMER_A_CAPTURECOMPARE_REGISTER_3);
             overflows=0;
-            i++;
+            i++; //bp
         } else if (i>0) {
             CaptureValues[i]=Timer_A_getCaptureCompareCount(TIMER_A2_BASE, TIMER_A_CAPTURECOMPARE_REGISTER_3);
-            Timeint=(float)(CaptureValues[i]-CaptureValues[i-1])/2000.0f;
-            i=0;
+            Timeint=(float)(CaptureValues[i]-CaptureValues[i-1] + overflows*0xFFFF)/2000.0f;
+            i=0; //bp
         }
     }
 

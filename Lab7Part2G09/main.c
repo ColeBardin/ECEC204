@@ -10,7 +10,7 @@
 
 #include "uart_functions.h"
 
-#define TIMER_PERIOD 300000 // Counter for updating duty cycle. 300,000 = 3 MHz * 4 seconds per period / 40 steps per period
+#define TIMER_PERIOD 75000 // Counter for updating duty cycle. 75,000 = 750 KHz * 4 seconds per period / 40 steps per period
 
 #define PWM_PERIOD  128 // CCR0 at 256 = 128 KHz / 500 Hz desired Hz
 #define DUTY_CYCLE_LENGTH 0 // CCR3 starts at 0
@@ -50,16 +50,16 @@ int main(void)
     GPIO_setAsPeripheralModuleFunctionOutputPin (GPIO_PORT_P2, GPIO_PIN6, GPIO_PRIMARY_MODULE_FUNCTION);
     CS_setExternalClockSourceFrequency(32000,CS_48MHZ);
     CS_startHFXT(false);
-    CS_initClockSignal(CS_MCLK,CS_HFXTCLK_SELECT,CS_CLOCK_DIVIDER_1); // MCLK 48 MHz
+    CS_initClockSignal(CS_MCLK,CS_HFXTCLK_SELECT,CS_CLOCK_DIVIDER_4); // MCLK 12 MHz
     CS_initClockSignal(CS_SMCLK, CS_HFXTCLK_SELECT, CS_CLOCK_DIVIDER_4);
 
     /* Initialize the low-speed auxiliary clock system. */
     CS_setReferenceOscillatorFrequency (CS_REFO_128KHZ); // Reference oscillator is set to 32KHz
     CS_initClockSignal (CS_ACLK, CS_REFOCLK_SELECT, CS_CLOCK_DIVIDER_1); // ACLK is 128 KHz for Timer A
 
-    /* Initialize T32 at 3 MHz = 48 MHz of MCLK / 16 Prescaler */
-    Timer32_initModule(TIMER32_0_BASE,TIMER32_PRESCALER_16,TIMER32_32BIT,TIMER32_PERIODIC_MODE); /* Timer32 at 3 MHz */
-    /* Start count height such that 40 counts will take 4 seconds: 3 MHz * 4 seconds per period / 40 counts per period */
+    /* Initialize T32 at 750 KHz = 12 MHz of MCLK / 16 Prescaler */
+    Timer32_initModule(TIMER32_0_BASE,TIMER32_PRESCALER_16,TIMER32_32BIT,TIMER32_PERIODIC_MODE); /* Timer32 at 750 KHz */
+    /* Start count height such that 40 counts will take 4 seconds: 750 KHz * 4 seconds per period / 40 counts per period */
     Timer32_setCount(TIMER32_0_BASE,TIMER_PERIOD);
     /* Start the counter */
     Timer32_startTimer(TIMER32_0_BASE,false);
