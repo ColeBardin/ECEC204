@@ -39,13 +39,13 @@ int main(void)
 
     initUART();
 
-    GPIO_setAsPeripheralModuleFunctionInputPin(GPIO_PORT_P6, GPIO_PIN6,GPIO_PRIMARY_MODULE_FUNCTION); /* P6.6 on TA2.3 */
     CS_setDCOCenteredFrequency(CS_DCO_FREQUENCY_12);
-    CS_initClockSignal(CS_MCLK,CS_DCOCLK_SELECT,CS_CLOCK_DIVIDER_1); // MCLK 48 MHz
-    CS_initClockSignal(CS_SMCLK, CS_DCOCLK_SELECT, CS_CLOCK_DIVIDER_1);
+    CS_initClockSignal(CS_SMCLK, CS_DCOCLK_SELECT, CS_CLOCK_DIVIDER_1); // SMCLK at 12 MHz for UART
 
     CS_setReferenceOscillatorFrequency(CS_REFO_128KHZ);
-    CS_initClockSignal(CS_ACLK,CS_REFOCLK_SELECT,CS_CLOCK_DIVIDER_1); /* ACLK at 0.5 Hz */
+    CS_initClockSignal(CS_ACLK,CS_REFOCLK_SELECT,CS_CLOCK_DIVIDER_16); /* ACLK at 128 KHz */
+
+    GPIO_setAsPeripheralModuleFunctionInputPin(GPIO_PORT_P6, GPIO_PIN6,GPIO_PRIMARY_MODULE_FUNCTION); /* P6.6 on TA2.3 */
 
     writeString("Established Connection with board");
 
@@ -62,8 +62,6 @@ int main(void)
     GPIO_setDriveStrengthHigh(GPIO_PORT_P2,GPIO_PIN1);
     GPIO_setOutputLowOnPin(GPIO_PORT_P2,GPIO_PIN1);
 
-
-
     while(1); //bp
 }
 
@@ -72,23 +70,26 @@ void TA2_N_IRQHandler(void)
     GPIO_toggleOutputOnPin(GPIO_PORT_P2,GPIO_PIN1);
     uint32_t status = Timer_A_getInterruptStatus(TIMER_A2_BASE);
 
-    /* status=0 -> overflow, stats=1 -> capture */
+    /* status=1 -> overflow, stats=0 -> capture */
     if (status == 1) {
         Timer_A_clearInterruptFlag(TIMER_A2_BASE);
         overflows++; //bp
+        writeString("Overflow");
     }
     else if (status == 0) {
         if (i==0){
             CaptureValues[i]=Timer_A_getCaptureCompareCount(TIMER_A2_BASE, TIMER_A_CAPTURECOMPARE_REGISTER_3);
             overflows=0;
             i++; //bp
+            writeString("S1");
         } else if (i>0) {
             CaptureValues[i]=Timer_A_getCaptureCompareCount(TIMER_A2_BASE, TIMER_A_CAPTURECOMPARE_REGISTER_3);
-            Timeint=(float)(CaptureValues[i]-CaptureValues[i-1] + overflows*0xFFFF)/2000.0f;
+            Timeint=(float)(CaptureValues[i]-CaptureValues[i-1] + overflows*0xFFFF)/8000.0f;
             i=0; //bp
+            writeString("S2");
+            writeFloat(Timeint);
         }
+        Timer_A_clearCaptureCompareInterrupt(TIMER_A2_BASE, TIMER_A_CAPTURECOMPARE_REGISTER_3);
     }
-
-    Timer_A_clearCaptureCompareInterrupt(TIMER_A2_BASE, TIMER_A_CAPTURECOMPARE_REGISTER_3);
 
 }
