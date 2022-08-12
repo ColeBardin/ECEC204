@@ -10,21 +10,6 @@
 #include "uart_functions.h"
 #include "blur_filter.h"
 
-
-const Timer_A_ContinuousModeConfig continuousModeConfig=
-    {
-     TIMER_A_CLOCKSOURCE_ACLK,
-     TIMER_A_CLOCKSOURCE_DIVIDER_1,
-     TIMER_A_TAIE_INTERRUPT_ENABLE,
-     TIMER_A_DO_CLEAR
-
-    };
-uint16_t time1=0;
-uint16_t time2=0;
-uint16_t ovf=0;
-uint16_t cnt=0;
-
-float timeint=0.0f;
 uint32_t M;
 /* Global variables containing the input and output images. */
 image_t in, out;
@@ -34,43 +19,34 @@ main (void)
 {
     /* Stop Watchdog  */
     MAP_WDT_A_holdTimer ();
+
     // Set up LFXT and from that derive ACLK at 32 KHz
     GPIO_setAsPeripheralModuleFunctionInputPin(GPIO_PORT_P1,GPIO_PIN0|GPIO_PIN1,GPIO_PRIMARY_MODULE_FUNCTION);
-    CS_setExternalClockSourceFrequency(32768,48000000);
-    CS_initClockSignal(CS_ACLK,CS_LFXTCLK_SELECT,CS_CLOCK_DIVIDER_1);
+    MAP_CS_setReferenceOscillatorFrequency(CS_REFO_128KHZ);
+    MAP_CS_initClockSignal(CS_SMCLK, CS_REFOCLK_SELECT,CS_CLOCK_DIVIDER_2); /* WDT Frequency: 128 KHz / Divider */
+
+    GPIO_setAsOutputPin(GPIO_PORT_P2,GPIO_PIN0);
+    GPIO_setAsOutputPin(GPIO_PORT_P2,GPIO_PIN1);
+    GPIO_setOutputHighOnPin(GPIO_PORT_P2,GPIO_PIN0);
+    GPIO_setOutputLowOnPin(GPIO_PORT_P2,GPIO_PIN1);
 
     // Set up DCOCLK at 12 MHz and from that derive CPU clock MCLK at 12 MHz
     CS_setDCOCenteredFrequency(CS_DCO_FREQUENCY_12);
-    CS_initClockSignal(CS_MCLK,CS_DCOCLK_SELECT,CS_CLOCK_DIVIDER_1);
+    CS_initClockSignal(CS_MCLK,CS_DCOCLK_SELECT,CS_CLOCK_DIVIDER_8); /* MCLK Frequency: 12 MHz / Divider */
     M=CS_getMCLK();
 
-    // Configure Timer A1 in continuous mode and start it, clear overflow
-    Timer_A_configureContinuousMode(TIMER_A1_BASE, &continuousModeConfig);
-    Interrupt_enableInterrupt(INT_TA1_N);
-    Interrupt_enableMaster();
-    Timer_A_startCounter(TIMER_A1_BASE,TIMER_A_CONTINUOUS_MODE);
-    ovf=0;
+    /* Configure WDT */
+    MAP_SysCtl_setWDTTimeoutResetType(SYSCTL_SOFT_RESET);
+    MAP_WDT_A_initWatchdogTimer(WDT_A_CLOCKSOURCE_SMCLK,WDT_A_CLOCKITERATIONS_32K);
+    MAP_WDT_A_startTimer(); /* Start the watchdog. */
 
-    // Take timer reading before starting to execute image processing
-    time1= Timer_A_getCounterValue(TIMER_A1_BASE);
+    /* Process the image blurring */
     acquireImage (&in, MIN_VALUE, MAX_VALUE, SIZE); // Acquire image
     blurFilter (&in, &out); // Process image
-    // Take timer reading after completing image processing execution
-    time2= Timer_A_getCounterValue(TIMER_A1_BASE);
-
-    // Calculate elapsed time
-    cnt=ovf;
-    timeint = ((float)(time2 - time1)+65536.0f*(float)cnt)/32768.0f;
+    /* Service WDT */
+    MAP_WDT_A_clearTimer();
+    GPIO_setOutputLowOnPin(GPIO_PORT_P2,GPIO_PIN0);
+    GPIO_setOutputHighOnPin(GPIO_PORT_P2,GPIO_PIN1);
 
     while(1);
 }
-
-// Interrupt Handler to count overflows
-void TA1_N_IRQHandler(void)
-{
-    Timer_A_clearInterruptFlag(TIMER_A1_BASE);
-    ovf++;
-}
-
-
-

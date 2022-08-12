@@ -12,7 +12,7 @@
 /* Define the size of the image as well as the min and max pixel
  * intensity values in it.
  */
-#define SIZE 60  // Size of the 2D N x N image in number of pixels along one dimension
+#define SIZE 32 // Size of the 2D N x N image in number of pixels along one dimension
 #define MIN_VALUE 5
 #define MAX_VALUE 10
 
