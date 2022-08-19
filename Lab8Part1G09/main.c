@@ -20,8 +20,6 @@ image_t in, out;
 int main (void) {
     /* Stop Watchdog  */
     MAP_WDT_A_holdTimer ();
-<<<<<<< HEAD
-
     // Set up LFXT and from that derive ACLK at 32 KHz
     GPIO_setAsPeripheralModuleFunctionInputPin(GPIO_PORT_P1,GPIO_PIN0|GPIO_PIN1,GPIO_PRIMARY_MODULE_FUNCTION);
     MAP_CS_setReferenceOscillatorFrequency(CS_REFO_128KHZ);
@@ -29,15 +27,10 @@ int main (void) {
 
     GPIO_setAsOutputPin(GPIO_PORT_P2,GPIO_PIN0);
     GPIO_setAsOutputPin(GPIO_PORT_P2,GPIO_PIN1);
-=======
-    GPIO_setAsOutputPin(GPIO_PORT_P2,GPIO_PIN0|GPIO_PIN1);
-    GPIO_setDriveStrengthHigh(GPIO_PORT_P2,GPIO_PIN0|GPIO_PIN1);
->>>>>>> 9d357af6a26ee6fde8838ab098fbd7d4aa730e58
     GPIO_setOutputHighOnPin(GPIO_PORT_P2,GPIO_PIN0);
     GPIO_setOutputLowOnPin(GPIO_PORT_P2,GPIO_PIN1);
 
     CS_setDCOCenteredFrequency(CS_DCO_FREQUENCY_12);
-<<<<<<< HEAD
     CS_initClockSignal(CS_MCLK,CS_DCOCLK_SELECT,CS_CLOCK_DIVIDER_8); /* MCLK Frequency: 12 MHz / Divider */
     M=CS_getMCLK();
 
@@ -56,21 +49,3 @@ int main (void) {
 
     while(1);
 }
-=======
-    CS_initClockSignal(CS_MCLK,CS_DCOCLK_SELECT,CS_CLOCK_DIVIDER_2);
-    M=CS_getMCLK();
-
-    CS_setReferenceOscillatorFrequency(CS_REFO_128KHZ);// REFOCLK is 32 KHz
-    CS_initClockSignal(CS_ACLK,CS_REFOCLK_SELECT,CS_CLOCK_DIVIDER_2);// ACLK is 8192 Hz
-    SysCtl_setWDTTimeoutResetType(SYSCTL_SOFT_RESET);
-    WDT_A_initWatchdogTimer(WDT_A_CLOCKSOURCE_ACLK,WDT_A_CLOCKITERATIONS_32K);//Watchdog reset at 1 sec
-    WDT_A_startTimer();
-
-    acquireImage (&in, MIN_VALUE, MAX_VALUE, SIZE); // Acquire image
-    blurFilter (&in, &out); // Process image
-
-    GPIO_setOutputLowOnPin(GPIO_PORT_P2,GPIO_PIN0);
-    GPIO_setOutputHighOnPin(GPIO_PORT_P2,GPIO_PIN1);
-
-    }
->>>>>>> 9d357af6a26ee6fde8838ab098fbd7d4aa730e58
