@@ -1,6 +1,9 @@
 # Mac stuff
 .DS_Store
 
+# Large files
+*.MOV
+
 # CCS Stuff
 .metadata
 */.metadata
