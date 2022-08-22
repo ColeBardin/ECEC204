@@ -175,3 +175,131 @@ difference is interrupts are not written explicitely
 in timer A capture mode config: capture compare int disabled
 in timer A upmode config: TA0_0 and TA0_N are disabpled
 in main: enable specific pin for compare pin
+
+
+
+
+RTOS:
+have tasks: {t1 t2 t3 ... tn}
+for some task ti
+period: pi
+deadline: di or Pi
+Worst Case Execution Time (WCET): ci
+
+-preemtive
+-independent
+
+Generate a schedule in which every task meets its deadline
+	needs a scheduling policy
+	Rate Monotonic (rate = 1/pi)
+
+Selects tasks of highest priority
+Shorter Period/Higher Rate = HIGHER PRIORITY
+Longer Period/Lower Rate = LOWER PRIORITY
+
+
+Utilization test
+t1: c1=20ms; p1=100ms H
+t2: c2=40ms; p2=150ms M
+t3: c3=100ms; p3=350ms L
+
+Utilization (ci/pi):
+U1: 20/100=0.2
+U2: 40/150=0.276
+U3: 100/350=0.286
+
+Trivial Test: 
+U1+U2+U3 <= 1
+
+Utilization test
+U1+U2+...+Un <= n*(2^(1/n)-1)
+U1+U2+U3 <= 3(2^(1/3) -1)
+0.753 <= 0.779
+
+as n->infinity n(2^(1/n)-1) = ln2 = 0.6993
+Sufficient, not necessary
+
+Given tasks, applying utilization test
+If passes, good
+If fails, then use EXACT SCHEDULABILITY TEST
+	If passes, good
+	If fails, Not schedulable
+
+
+Other Scheduling Algorithm:
+Earliest Deadline First (EDF)
+Pros: can sometimes schedule a set of tasks that Rate Monotonic cannot
+Cons: Overhead. Processessing needed to sort tasks by deadlines
+
+
+
+Programming
+RTOS Services:
+TI-RTOS (Free_RTOS is better for general use)
+Bare Metal Programming:
+Application
+Driverlib
+MSP432
+
+Architecture:
+Application (multi-threaded/task)
+TI_RTOS
+Driverlib
+MSP432
+
+App, RTOS and Driverlib are linked to an executable
+n threds for each task
+Use a threading library (PThreads)
+
+PThreads
+Posix-Threads
+Thread creation
+Inter-thread communication
+Thread synchronization
+Scheduling
+Memory management
+
+TI_RTOS handles all except Thread Creation
+
+What is a Thread?
+Software construct which executes a function
+
+TI_RTOS has multiple types of threads:
+HWI (Hardware interrupts)
+SWI (Software interrupts)
+Tasks (User created)
+Idle
+
+A thread contains:
+function
+parameters
+priority (8bit, higher num = higher priority)
+thread ID
+function stack in memory
+state (registers and vals, program counter. for when other thread needs to be run)
+
+Life cycle:
+RTOS has ready que
+scheduler places thread on ready que
+looks at READY que and decides which thread to run (dispatch)
+state of thread is RUNNING
+	multiple things can happen now
+	can return thread from READY to Ready (Preemted)
+	can finish running and exit (TERMINATED)
+	can also be BLOCKED (I/O request or MSG from other thread)
+		Once requests are satisfied, returns to READY (can be deleted and TERMINATED)
+
+
+thread is DETACHED: no returning value (blinking LED)
+JOINABLE: thread returns value to main
+
+Code:
+main() {
+	...
+	int delay=1;
+	status = pthread_create(&tid, &attrs, mainThread, (void *)delay) -> Places in READY
+	// typecast all arguments to void * and in func accept void * and then typecast back to needed data type
+	...
+	start scheduler
+	// NOT REACHABLE! infinite loop^
+}
