@@ -8,8 +8,9 @@
 #include <stdio.h>
 #include <string.h>
 
-#define N_ATTEMPTS 3 /* Number of passcode attempts after device is locked */
-#define TIMER_PERIOD 65000
+#define CAN         0x18    /* Cancel in ASCII (24) */
+#define N_ATTEMPTS  3       /* Number of passcode attempts after device is locked */
+#define TIMEOUT     5       /* Timeout duration in seconds */
 
 char charCode;
 char pass[6]; /* String where usable password will be stored since it needs to be in main stack frame */
@@ -18,6 +19,9 @@ uint8_t state=0; /* State of lock, 0=UNLOCKED, 1=LOCKED */
 uint8_t input=0; /* Status used by UART Interrupt to tell getButton to wait until new value is input */
 uint8_t fails=0; /* Counter for number of fails */
 uint8_t flash=0; /* State of flashing LED when changing passcode */
+uint8_t timeout=0; /* State for whether or not to count timeouts */
+uint16_t start_time, end_time, elapsed_time;
+unsigned int ovf=0;
 
 /* Configuration for timer in continuous mode. */
 const Timer_A_ContinuousModeConfig continuousModeConfig = {
@@ -59,21 +63,45 @@ writeString (char *buffer)
 
 /* Waits for input flag to be set by UART INT upon input. Clears flag and returns character input */
 char getButton(){
-    while(!input);
+    while(!input){
+        if (timeout){
+            end_time =Timer_A_getCounterValue(TIMER_A0_BASE);
+            elapsed_time=(float)(ovf*0xFFFF+end_time-start_time)/128000.0f;
+            if (elapsed_time > TIMEOUT){
+                writeString("Timeout Occured! Start Over");
+                writeString("Enter 5 Digit Passcode");
+                return CAN; // If Counter exceeds overflow, return CAN (cancel in ASCII)
+            }
+        }
+    }
     input=0;
     return charCode;
 }
 
 /* Matches user input to the current passcode, 0=FAIL, 1=SUCCESS */
 int getCombination() {
-    char index=0;
+    int index=0;
+    char input;
     /* Iterate for each index of the passcode */
     for (index=0; index<5; index++) {
-        if (getButton() != pass[index]){ /* Get button pushed by user via UART. */
+        input = getButton();
+        if (input==CAN) {
+            index=-1;
+            timeout=0; // Disable timeout for first input
+            continue;
+        }
+        if (input != pass[index]){ /* Get button pushed by user via UART. */
             /* If any do not match, FAIL */
+            timeout=0; // Disable timeout counting
             return 0;
         }
+        if(index==0){
+            start_time=Timer_A_getCounterValue(TIMER_A0_BASE);
+            timeout=1;
+            ovf=0;
+        }
     }
+    timeout=0; // Disable timeout counting
     /* If all 5 are matched, return SUCCESS */
     return 1;
 
@@ -96,8 +124,8 @@ int setPasscode(){
     for (index=0; index<5; index++){
         if (new[index] != getButton()){
             writeString("Aborted! Passcodes don't match");
-            flash=0;
-            GPIO_setOutputHighOnPin(GPIO_PORT_P1, GPIO_PIN0);
+            flash=0; // Stop flashing LED
+            GPIO_setOutputHighOnPin(GPIO_PORT_P1, GPIO_PIN0); // Ensure LED is ON since dvice is LOCKED
             return 0;
         }
     }
@@ -105,8 +133,8 @@ int setPasscode(){
     sprintf(msg, "Success! Passcode changed to: %s", new);
     writeString(msg);
     strcpy(pass, new);
-    flash=0;
-    GPIO_setOutputLowOnPin(GPIO_PORT_P1, GPIO_PIN0);
+    flash=0; // Stop flashing LED
+    GPIO_setOutputLowOnPin(GPIO_PORT_P1, GPIO_PIN0); // Ensure LED is OFF since device is UNLOCKED
     return 1;
 }
 
@@ -199,6 +227,7 @@ int main(void)
 void TA0_N_IRQHandler (void) {
     Timer_A_clearInterruptFlag (TIMER_A0_BASE);
     /* Increment overflow counter */
+    ovf++;
     if (flash){
         GPIO_toggleOutputOnPin(GPIO_PORT_P1, GPIO_PIN0);
     }
