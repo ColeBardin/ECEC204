@@ -1,3 +1,4 @@
+/* Lab 8 Part 2 by G09 */
 /* DriverLib Includes */
 #include <ti/devices/msp432p4xx/driverlib/driverlib.h>\
 
@@ -8,15 +9,23 @@
 #include <string.h>
 
 #define N_ATTEMPTS 3 /* Number of passcode attempts after device is locked */
+#define TIMER_PERIOD 65000
 
 char charCode;
-char *dpass = "24153"; /* String literal of default password */
-char pass[6]; /* String where usable password will be stores since dpass is readonly and cannot be reset */
+char pass[6]; /* String where usable password will be stored since it needs to be in main stack frame */
 
 uint8_t state=0; /* State of lock, 0=UNLOCKED, 1=LOCKED */
 uint8_t input=0; /* Status used by UART Interrupt to tell getButton to wait until new value is input */
 uint8_t fails=0; /* Counter for number of fails */
+uint8_t flash=0; /* State of flashing LED when changing passcode */
 
+/* Configuration for timer in continuous mode. */
+const Timer_A_ContinuousModeConfig continuousModeConfig = {
+    TIMER_A_CLOCKSOURCE_ACLK, // Clock source
+    TIMER_A_CLOCKSOURCE_DIVIDER_1, // Divider ratio
+    TIMER_A_TAIE_INTERRUPT_ENABLE, // Enable TAIE interrupt
+    TIMER_A_DO_CLEAR
+};
 
 const eUSCI_UART_ConfigV1 uartConfig=   // For CCSv9 and CCSv10 have UART_ConfigV1
 {
@@ -76,7 +85,7 @@ int setPasscode(){
     new[5]='\0'; /* Null terminate uninitialized 5-char string */
     char msg[256];
     int index;
-
+    flash=1;
     /* Get new passcode from user */
     writeString("Enter New 5 Digit Passcode");
     for (index=0; index<5; index++){
@@ -87,6 +96,8 @@ int setPasscode(){
     for (index=0; index<5; index++){
         if (new[index] != getButton()){
             writeString("Aborted! Passcodes don't match");
+            flash=0;
+            GPIO_setOutputHighOnPin(GPIO_PORT_P1, GPIO_PIN0);
             return 0;
         }
     }
@@ -94,6 +105,8 @@ int setPasscode(){
     sprintf(msg, "Success! Passcode changed to: %s", new);
     writeString(msg);
     strcpy(pass, new);
+    flash=0;
+    GPIO_setOutputLowOnPin(GPIO_PORT_P1, GPIO_PIN0);
     return 1;
 }
 
@@ -107,6 +120,16 @@ int main(void)
     CS_setDCOCenteredFrequency(CS_DCO_FREQUENCY_12);
     CS_initClockSignal(CS_SMCLK, CS_DCOCLK_SELECT, CS_CLOCK_DIVIDER_1); // SMCLK at 12 MHz for UART
 
+    /* Initialize the low-speed auxiliary clock system. */
+    CS_setReferenceOscillatorFrequency (CS_REFO_128KHZ); // Reference oscillator is set to 32KHz
+    CS_initClockSignal (CS_ACLK, CS_REFOCLK_SELECT, CS_CLOCK_DIVIDER_1); // Auxiliary clock derives from reference
+    /* Configure Timer_A0 in continuous-mode. */
+    Timer_A_configureContinuousMode(TIMER_A0_BASE, &continuousModeConfig);
+    /* Enable the interrupt processing system for the timer. */
+    Interrupt_enableInterrupt(INT_TA0_N); // Invoke ISR when Timer_A0 resets to zero
+    /* Start the timers. */
+    Timer_A_startCounter(TIMER_A0_BASE, TIMER_A_CONTINUOUS_MODE);
+
     // P1.2 and P1.3 are UART TXD and RXD. These pins must be put in special function mode
     GPIO_setAsPeripheralModuleFunctionInputPin(GPIO_PORT_P1,GPIO_PIN2|GPIO_PIN3,GPIO_PRIMARY_MODULE_FUNCTION);;
     MAP_UART_initModule(EUSCI_A0_BASE, &uartConfig);
@@ -119,7 +142,7 @@ int main(void)
     GPIO_setOutputLowOnPin(GPIO_PORT_P1,GPIO_PIN0);
 
     /* Copy string literal into editable var */
-    strcpy(pass, dpass);
+    strcpy(pass, "24153");
     writeString("Device is UNLOCKED");
 
     while(1) {
@@ -171,6 +194,15 @@ int main(void)
             fails=0;
         }
     }
+}
+
+void TA0_N_IRQHandler (void) {
+    Timer_A_clearInterruptFlag (TIMER_A0_BASE);
+    /* Increment overflow counter */
+    if (flash){
+        GPIO_toggleOutputOnPin(GPIO_PORT_P1, GPIO_PIN0);
+    }
+    return;
 }
 
 //Interrupt handler receives and echoes character typed in serial terminal even if it is out of the valid range 1-5 secs
