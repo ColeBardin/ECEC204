@@ -10,7 +10,7 @@
 
 #define CAN         0x18    /* Cancel in ASCII (24) */
 #define N_ATTEMPTS  3       /* Number of passcode attempts after device is locked */
-#define TIMEOUT     5       /* Timeout duration in seconds */
+#define TIMEOUT     10       /* Timeout duration in seconds */
 
 char charCode;
 char pass[6]; /* String where usable password will be stored since it needs to be in main stack frame */
