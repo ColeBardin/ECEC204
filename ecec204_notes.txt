@@ -271,11 +271,11 @@ Tasks (User created)
 Idle
 
 A thread contains:
-function
-parameters
-priority (8bit, higher num = higher priority)
 thread ID
-function stack in memory
+function
+parameter (only 1, use structs for multiple arguments)
+priority (8bit, higher num = higher priority)
+stack in memory
 state (registers and vals, program counter. for when other thread needs to be run)
 
 Life cycle:
@@ -283,23 +283,92 @@ RTOS has ready que
 scheduler places thread on ready que
 looks at READY que and decides which thread to run (dispatch)
 state of thread is RUNNING
-	multiple things can happen now
+	multiple things can happen now:
 	can return thread from READY to Ready (Preemted)
 	can finish running and exit (TERMINATED)
 	can also be BLOCKED (I/O request or MSG from other thread)
-		Once requests are satisfied, returns to READY (can be deleted and TERMINATED)
+		Once requests are satisfied, returns to READY (or can be deleted and TERMINATED)
 
 
 thread is DETACHED: no returning value (blinking LED)
 JOINABLE: thread returns value to main
 
 Code:
+void delay(void *d){
+	int time = (int)d;
+	...
+}
 main() {
 	...
 	int delay=1;
 	status = pthread_create(&tid, &attrs, mainThread, (void *)delay) -> Places in READY
-	// typecast all arguments to void * and in func accept void * and then typecast back to needed data type
+	// typecast argument to void* and in func accept void* and then typecast back to needed data type
 	...
 	start scheduler
 	// NOT REACHABLE! infinite loop^
 }
+
+
+MultiThread Programming:
+V1:
+main(){
+	...
+	pthread_create(...) //Blinky
+	...
+	pthread_create(...) //UART
+	// Blinky and UART in READY in DETACHED MODE
+	...
+	start scheduler
+}
+
+V2:
+contractor(){
+	// Custom TID
+	// FORK POINT
+	for (i=0;i<N;i++)
+		pthread_create(...) // Worker() and TID which is index value
+	...
+	// JOIN POINT
+	for(N)
+		pthread_join(OSTID)
+	...
+}
+worker(tid){
+	...
+}
+main(){
+	...
+	// Contractor
+	pthread_create(...) // Contractor
+	...
+	start scheduler
+}
+
+SIMD Programming:
+single instruction multiple data
+every thread executing same sequence of instructions on different data
+
+k threads dividing a long array into k chunks and each individually calculating the sum
+
+Efficient on single core?
+No, if it is only compute intensive
+Yes, if it is compute intensive and contains I/O 
+
+
+Thread Communication:
+Use message que (data structure within kernel space)
+FIFO, bounder/circular
+send() and recv() with message decriptor MQ
+
+Behavior
+send()
+1) if MQ has space, place message in que and return (NON BLOCKNG)
+2) if MQ is full, BLOCK until there is space
+
+recv()
+1) if MQ is empty, BLOCK
+2) else return message from MQ
+
+multiple threads sending messages to que and multiple recievers reading messages from que
+OS guarantees that MQ is "thread safe"
+if two are tring to WRITE at same time to same loc, OS will BLOCK one
