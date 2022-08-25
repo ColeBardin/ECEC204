@@ -34,13 +34,14 @@ void *uartThread(void *arg0)
         /* UART_open() failed */
         while (1);
     }
-
+    /* Write confirmation prompt to terminal */
     UART_write(uart, echoPrompt, sizeof(echoPrompt));
 
     /* Loop forever echoing input received from the UART */
     while (1) {
+        /* Read in character */
         UART_read(uart, &input, 1);
-
+        /* If input is 2-5 inclusive, write number to msg que */
         switch(input){
         case '2':
             msg=2;
@@ -58,10 +59,10 @@ void *uartThread(void *arg0)
             msg=5;
             mq_send(*mqdes, (char *)&msg, sizeof(msg), 0);
             break;
-        default:
+        default: /* If not, do nothing */
             break;
         }
-
+        /* Echo input character in terminal */
         UART_write(uart, &input, 1);
     }
 }

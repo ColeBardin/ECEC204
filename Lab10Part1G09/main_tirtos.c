@@ -38,7 +38,7 @@ int main(void)
       while (1);
     }
 
-    /* Create thread to toggle LED1 at a rate of once every 2 seconds */
+    /* Create thread to toggle LED1 at a rate of once every 1 seconds and recieve from mqdes */
     pthread_attr_init(&attrs);
     threadPriority.sched_priority = 1;
     pthread_attr_setschedparam(&attrs, &threadPriority);
