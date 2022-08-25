@@ -11,9 +11,11 @@
 void *uartThread(void *arg0)
 {
     char        input;
+    int         msg;
     const char  echoPrompt[] = "Echoing characters:\r\n";
     UART_Handle uart;
     UART_Params uartParams;
+    mqd_t *mqdes = (mqd_t *) arg0; /* Message queue descriptor */
 
     /* Call driver init functions */
     UART_init();
@@ -38,6 +40,28 @@ void *uartThread(void *arg0)
     /* Loop forever echoing input received from the UART */
     while (1) {
         UART_read(uart, &input, 1);
+
+        switch(input){
+        case '2':
+            msg=2;
+            mq_send(*mqdes, (char *)&msg, sizeof(msg), 0);
+            break;
+        case '3':
+            msg=3;
+            mq_send(*mqdes, (char *)&msg, sizeof(msg), 0);
+            break;
+        case '4':
+            msg=4;
+            mq_send(*mqdes, (char *)&msg, sizeof(msg), 0);
+            break;
+        case '5':
+            msg=5;
+            mq_send(*mqdes, (char *)&msg, sizeof(msg), 0);
+            break;
+        default:
+            break;
+        }
+
         UART_write(uart, &input, 1);
     }
 }
