@@ -1,9 +1,4 @@
-/* Description: Program illustrating the creation of multiple POSIX threads
- *
- * Author: Naga Kandasamy
- * Date created: August 25, 2019
- * Date modified: August 16, 2021
- */
+/* Lab 10 by G09 */
 
 #include <stdlib.h>
 #include <pthread.h>
