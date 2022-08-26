@@ -21,6 +21,7 @@ void *blinkyThread(void *arg0)
     GPIO_write(Board_GPIO_LED0, Board_GPIO_LED_OFF);
 
     while (1) {
+        /* If mqrecieve fails, EXIT */
         if (mq_receive(*mqdes, (char *)&msg, sizeof(msg), NULL) == -1){
             break;
         }
