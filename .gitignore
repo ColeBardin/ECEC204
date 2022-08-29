@@ -31,3 +31,4 @@ Debug
 # ASV files
 *.asv
 ~*
+*.swp
