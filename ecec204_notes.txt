@@ -372,3 +372,58 @@ recv()
 multiple threads sending messages to que and multiple recievers reading messages from que
 OS guarantees that MQ is "thread safe"
 if two are tring to WRITE at same time to same loc, OS will BLOCK one
+
+
+
+Thread Synchronization:
+-> shared variables
+
+threads in CRITICAL SECTION where shared vars live
+Make sure only ONE thread is in Critical Section at a time
+
+Mutual Exclusion (mutex)
+	Serialize Access
+
+Semaphore
+	-Mutex
+	-Signaling
+
+If threads try to edit shared var at same time?
+Consider a program with shared variable a=0 and 2 threads:
+T1:
+for(i=0;i<1000;i++){
+	...
+	a++;
+}
+
+T2:
+for(i=0;i<1000;i++){
+	...
+	a--;
+}
+Is operation Atomic
+	Once a thread is started, it cannot be preemted by another thread until it finishes
+	
+For increment and decrement calls, they are split into 3 instructions:
+a++:
+load r1 with a (I1)
+increment r1 (I2)
+store r1 into a (I3)
+
+a--:
+load r2 with a (I4)
+decrement r2 (I5)
+store r2 into a (I6)
+
+Interleaving:
+I1 ... I2 ... T1 PREEMTED ... I4 ... I5 ... I6 ... T2 PREEMTED ... I3
+decrement value is ignored in this case so value in a is INCORRECT
+can happen in reverse with T2 being interrupted and INCREMENT ignored
+
+Most of the time though, interleaving does not happen, but it can
+
+RACE CONDITION when result in a is NOT 0
+threads are racing to finish and interleave
+VERY HARD to debug, so protect shared variables
+
+
