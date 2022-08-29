@@ -521,6 +521,5 @@ V(s1)
 V(s2)
 
 If T1 locks s1 and T2 locks s2,
-then program gets blocked as threads try to lock semaphore held by the other thread
-program completely stuck 
-
+then program gets blocked as threads try to lock semaphore held by the other threads 
+program haulted forever
