@@ -378,7 +378,7 @@ if two are tring to WRITE at same time to same loc, OS will BLOCK one
 Thread Synchronization:
 -> shared variables
 
-threads in CRITICAL SECTION where shared vars live
+CRITICAL SECTION: statements in threads where shared vars are edited
 Make sure only ONE thread is in Critical Section at a time
 
 Mutual Exclusion (mutex)
@@ -393,13 +393,13 @@ Consider a program with shared variable a=0 and 2 threads:
 T1:
 for(i=0;i<1000;i++){
 	...
-	a++;
+	a++; // CRITICAL SECTION
 }
 
 T2:
 for(i=0;i<1000;i++){
 	...
-	a--;
+	a--; // CRITICAL SECTION
 }
 Is operation Atomic
 	Once a thread is started, it cannot be preemted by another thread until it finishes
@@ -424,6 +424,103 @@ Most of the time though, interleaving does not happen, but it can
 
 RACE CONDITION when result in a is NOT 0
 threads are racing to finish and interleave
-VERY HARD to debug, so protect shared variables
+VERY HARD to debug, so make variables ATOMIC
 
+functions for atomic operations:
+for example, on NVIDIA GPUs
+atomicAdd(a,1) // atomically add 1 to a
+atomicSub(a,1) // atomically subtract 1 from a
+
+For non atomic functions, you must SERIALIZE access to CRITICAL SECTION
+
+
+Semaphore:
+downside, slows down program to wait for s to be unlocked
+S ; range(0, r-1)
+2 Operations:
+Probe(s): // called P
+	is s>0?
+		yes: decrement s by 1 ; return
+		no:  val is 0. gets blocked by OS and wait for V to unblock
+
+Signal(s): // called V
+	increment s
+	Wake up thread(s) in BLOCKED on s (now P can decrement s)
+
+
+sem_wait() // Probe
+sem_post() // signal
+
+
+Signalling purposes:
+2 threads
+for operations O1 and O2, must be sequenced O2 before O1
+
+Semaphore:init s=0
+T1:
+...
+probe(s);
+O1;
+...
+
+T2:
+...
+O2;
+signal(s);
+...
+
+
+
+Mutal Exclusion (Locking or MUTEX)
+for a set of shared variables
+make semaphore s
+
+init s=1 (cannot be 0 because then access to any CS will be blocked)
+T1:
+while(1){
+	...
+	probe(s)
+	CRITICAL SECTION
+	signal(s)
+	...
+}
+
+T2:
+while(1){
+	...
+	probe(s)
+	CRITICAL SECTION
+	signal(s)
+	...
+}
+
+GRANULARITY of CS
+-> Multiple Locks
+	-> Can lead to DEADLOCKS
+
+
+Deadlock example:
+s1
+s2
+
+T1:
+P(s1)
+...
+P(s2)
+...
+V(s2)
+V(s1)
+
+T2:
+...
+P(s2) // big mistake
+...
+P(s1)
+...
+V(s1)
+V(s2)
+
+If T1 locks s1 and T2 locks s2,
+then program gets blocked as threads try to lock semaphore held by the other thread
+program completely stuck 
 
