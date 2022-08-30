@@ -12,7 +12,7 @@ const Timer_A_ContinuousModeConfig continuousModeConfig=
 {
     TIMER_A_CLOCKSOURCE_ACLK,
     TIMER_A_CLOCKSOURCE_DIVIDER_1,
-    TIMER_A_TAIE_INTERRUPT_DISABLE,
+    TIMER_A_TAIE_INTERRUPT_ENABLE,
     TIMER_A_DO_CLEAR
 };
 
@@ -43,7 +43,7 @@ int main(void)
     CS_initClockSignal(CS_SMCLK, CS_DCOCLK_SELECT, CS_CLOCK_DIVIDER_1); // SMCLK at 12 MHz for UART
 
     CS_setReferenceOscillatorFrequency(CS_REFO_128KHZ);
-    CS_initClockSignal(CS_ACLK,CS_REFOCLK_SELECT,CS_CLOCK_DIVIDER_16); /* ACLK at 128 KHz */
+    CS_initClockSignal(CS_ACLK,CS_REFOCLK_SELECT,CS_CLOCK_DIVIDER_1); /* ACLK at 128 KHz */
 
     GPIO_setAsPeripheralModuleFunctionInputPin(GPIO_PORT_P6, GPIO_PIN6,GPIO_PRIMARY_MODULE_FUNCTION); /* P6.6 on TA2.3 */
 
@@ -84,7 +84,7 @@ void TA2_N_IRQHandler(void)
             writeString("S1");
         } else if (i>0) {
             CaptureValues[i]=Timer_A_getCaptureCompareCount(TIMER_A2_BASE, TIMER_A_CAPTURECOMPARE_REGISTER_3);
-            Timeint=(float)(CaptureValues[i]-CaptureValues[i-1] + overflows*0xFFFF)/8000.0f;
+            Timeint=(float)(CaptureValues[i]-CaptureValues[i-1] + overflows*0xFFFF)/128000.0f;
             i=0; //bp
             writeString("S2");
             writeFloat(Timeint);
