@@ -31,7 +31,6 @@ float Timeint;
 uint32_t overflows=0;
 
 volatile uint16_t CaptureValues[2]={0,0};
-//volatile float CaptureFreq[10];
 
 int main(void)
 {
@@ -74,7 +73,6 @@ void TA2_N_IRQHandler(void)
     if (status == 1) {
         Timer_A_clearInterruptFlag(TIMER_A2_BASE);
         overflows++; //bp
-        writeString("Overflow");
     }
     else if (status == 0) {
         if (i==0){
