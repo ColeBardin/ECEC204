@@ -75,6 +75,7 @@ void TA2_N_IRQHandler(void)
         overflows++; //bp
     }
     else if (status == 0) { /* On Rising edge to P6.6 */
+        Timer_A_clearCaptureCompareInterrupt(TIMER_A2_BASE, TIMER_A_CAPTURECOMPARE_REGISTER_3);
         if (i==0){ /* First Rising Edge */
             CaptureValues[i]=Timer_A_getCaptureCompareCount(TIMER_A2_BASE, TIMER_A_CAPTURECOMPARE_REGISTER_3); // Capture current timer count
             overflows=0; // Reset overflow counter
@@ -88,5 +89,4 @@ void TA2_N_IRQHandler(void)
             writeFloat(Timeint);
         }
     }
-    Timer_A_clearCaptureCompareInterrupt(TIMER_A2_BASE, TIMER_A_CAPTURECOMPARE_REGISTER_3);
 }
