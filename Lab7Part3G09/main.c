@@ -42,7 +42,7 @@ int main(void)
     CS_initClockSignal(CS_SMCLK, CS_DCOCLK_SELECT, CS_CLOCK_DIVIDER_1); // SMCLK at 12 MHz for UART
 
     CS_setReferenceOscillatorFrequency(CS_REFO_128KHZ);
-    CS_initClockSignal(CS_ACLK,CS_REFOCLK_SELECT,CS_CLOCK_DIVIDER_1); /* ACLK at 128 KHz */
+    CS_initClockSignal(CS_ACLK,CS_REFOCLK_SELECT,CS_CLOCK_DIVIDER_4); /* ACLK at 32 KHz */
 
     GPIO_setAsPeripheralModuleFunctionInputPin(GPIO_PORT_P6, GPIO_PIN6,GPIO_PRIMARY_MODULE_FUNCTION); /* P6.6 on TA2.3 */
 
@@ -74,20 +74,19 @@ void TA2_N_IRQHandler(void)
         Timer_A_clearInterruptFlag(TIMER_A2_BASE);
         overflows++; //bp
     }
-    else if (status == 0) {
-        if (i==0){
-            CaptureValues[i]=Timer_A_getCaptureCompareCount(TIMER_A2_BASE, TIMER_A_CAPTURECOMPARE_REGISTER_3);
-            overflows=0;
+    else if (status == 0) { /* On Rising edge to P6.6 */
+        if (i==0){ /* First Rising Edge */
+            CaptureValues[i]=Timer_A_getCaptureCompareCount(TIMER_A2_BASE, TIMER_A_CAPTURECOMPARE_REGISTER_3); // Capture current timer count
+            overflows=0; // Reset overflow counter
             i++; //bp
             writeString("S1");
-        } else if (i>0) {
-            CaptureValues[i]=Timer_A_getCaptureCompareCount(TIMER_A2_BASE, TIMER_A_CAPTURECOMPARE_REGISTER_3);
-            Timeint=(float)(CaptureValues[i]-CaptureValues[i-1] + overflows*0xFFFF)/128000.0f;
+        } else if (i>0) { /* Second Rising Edge */
+            CaptureValues[i]=Timer_A_getCaptureCompareCount(TIMER_A2_BASE, TIMER_A_CAPTURECOMPARE_REGISTER_3); // Captuer current timer count
+            Timeint=(float)(CaptureValues[i]-CaptureValues[i-1] + overflows*0xFFFF)/32000.0f; // Calculate elapsed time
             i=0; //bp
             writeString("S2");
             writeFloat(Timeint);
         }
-        Timer_A_clearCaptureCompareInterrupt(TIMER_A2_BASE, TIMER_A_CAPTURECOMPARE_REGISTER_3);
     }
-
+    Timer_A_clearCaptureCompareInterrupt(TIMER_A2_BASE, TIMER_A_CAPTURECOMPARE_REGISTER_3);
 }
